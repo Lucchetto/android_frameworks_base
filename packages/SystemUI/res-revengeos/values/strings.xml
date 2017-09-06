@@ -24,4 +24,10 @@
     <string name="clock_title_binary" translatable="false">Binary</string>
 
     <string name="wday_month_day_no_year_alarm" translatable="false">EEEEMMMMd</string>
+
+   <!-- Caffeine QS Tile -->
+    <string name="quick_settings_caffeine_label">Caffeine</string>
+    <string name="accessibility_quick_settings_caffeine_off">Caffeine off</string>
+    <string name="accessibility_quick_settings_caffeine_on">Caffeine on</string>
+
 </resources>
