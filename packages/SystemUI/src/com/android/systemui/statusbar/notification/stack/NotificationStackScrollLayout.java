@@ -249,11 +249,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     private int mCollapsedSize;
     private int mPaddingBetweenElements;
     private int mIncreasedPaddingBetweenElements;
-    private int mMaxTopPadding;
     private int mTopPadding;
     private int mBottomMargin;
     private int mBottomInset = 0;
-    private float mQsExpansionFraction;
 
     /**
      * The algorithm which calculates the properties for our children
@@ -300,7 +298,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     private boolean mPanelTracking;
     private boolean mExpandingNotification;
     private boolean mExpandedInThisMotion;
-    private boolean mShouldShowShelfOnly;
     protected boolean mScrollingEnabled;
     protected FooterView mFooterView;
     protected EmptyShadeView mEmptyShadeView;
@@ -1419,20 +1416,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         mAmbientState.setAppearing(appearing);
         if (!appearing) {
             translationY = 0;
-            if (mShouldShowShelfOnly) {
-                stackHeight = mTopPadding + mShelf.getIntrinsicHeight();
-            } else if (mQsExpanded) {
-                int stackStartPosition = mContentHeight - mTopPadding + mIntrinsicPadding;
-                int stackEndPosition = mMaxTopPadding + mShelf.getIntrinsicHeight();
-                if (stackStartPosition <= stackEndPosition) {
-                    stackHeight = stackEndPosition;
-                } else {
-                    stackHeight = (int) NotificationUtils.interpolate(stackStartPosition,
-                            stackEndPosition, mQsExpansionFraction);
-                }
-            } else {
-                stackHeight = (int) height;
-            }
+            stackHeight = (int) height;
         } else {
             appearFraction = calculateAppearFraction(height);
             if (appearFraction >= 0) {
@@ -2985,11 +2969,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         }
         setTopPadding(topPadding, animate && !mKeyguardBypassController.getBypassEnabled());
         setExpandedHeight(mExpandedHeight);
-    }
-
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
-    public void setMaxTopPadding(int maxTopPadding) {
-        mMaxTopPadding = maxTopPadding;
     }
 
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
@@ -5383,11 +5362,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         updateScrollability();
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    public void setQsExpansionFraction(float qsExpansionFraction) {
-        mQsExpansionFraction = qsExpansionFraction;
-    }
-
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     private void setOwnScrollY(int ownScrollY) {
         assert !ANCHOR_SCROLLING;
@@ -5480,12 +5454,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    public void setShouldShowShelfOnly(boolean shouldShowShelfOnly) {
-        mShouldShowShelfOnly = shouldShowShelfOnly;
-        updateAlgorithmLayoutMinHeight();
-    }
-
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     public int getMinExpansionHeight() {
         return mShelf.getIntrinsicHeight()
@@ -5575,8 +5543,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println(String.format("[%s: pulsing=%s qsCustomizerShowing=%s visibility=%s"
-                        + " alpha:%f scrollY:%d maxTopPadding:%d showShelfOnly=%s"
-                        + " qsExpandFraction=%f]",
+                        + " alpha:%f scrollY:%d]",
                 this.getClass().getSimpleName(),
                 mPulsing ? "T" : "f",
                 mAmbientState.isQsCustomizerShowing() ? "T" : "f",
@@ -5584,10 +5551,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                         : getVisibility() == View.GONE ? "gone"
                                 : "invisible",
                 getAlpha(),
-                mAmbientState.getScrollY(),
-                mMaxTopPadding,
-                mShouldShowShelfOnly ? "T" : "f",
-                mQsExpansionFraction));
+                mAmbientState.getScrollY()));
         int childCount = getChildCount();
         pw.println("  Number of children: " + childCount);
         pw.println();
