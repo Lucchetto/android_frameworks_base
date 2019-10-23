@@ -71,4 +71,11 @@
     <dimen name="volume_dialog_panel_ringer_icon_padding">14dp</dimen>
     <dimen name="volume_dialog_media_player_height">150dp</dimen>
     <dimen name="volume_dialog_media_player_width">156dp</dimen>
+
+    <dimen name="kg_security_container_min_bottom_margin">0dp</dimen>
+
+    <dimen name="binary_clock_dot_size">8dp</dimen>
+    <dimen name="binary_clock_stroke_width">2dp</dimen>
+    <dimen name="binary_clock_width">100dp</dimen>
+    <dimen name="binary_clock_height">100dp</dimen>
 </resources>

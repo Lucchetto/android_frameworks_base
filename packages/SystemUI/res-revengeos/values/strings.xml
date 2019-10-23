@@ -25,4 +25,6 @@
     <string name="media_output_title">Play media to</string>
 
     <string name="wday_month_day_no_year_alarm" translatable="false">EEEEMMMMd</string>
+
+    <string name="clock_title_binary" translatable="false">Binary</string>
 </resources>
