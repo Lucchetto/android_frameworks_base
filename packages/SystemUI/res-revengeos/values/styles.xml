@@ -55,4 +55,8 @@
         <item name="android:includeFontPadding">false</item>
         <item name="android:background">@drawable/btn_translucent_borderless</item>
     </style>
+
+     <style name="widget_big_thin" parent="widget_big" >
+        <item name="android:fontFamily">sans-serif-thin</item>
+    </style>
 </resources>
