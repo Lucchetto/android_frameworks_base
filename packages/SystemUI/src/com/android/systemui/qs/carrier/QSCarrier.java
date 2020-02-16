@@ -27,7 +27,6 @@ import android.widget.TextView;
 
 import com.android.settingslib.Utils;
 import com.android.settingslib.graph.SignalDrawable;
-import com.android.systemui.DualToneHandler;
 import com.android.systemui.R;
 import com.android.systemui.qs.QuickStatusBarHeader;
 
@@ -39,7 +38,6 @@ public class QSCarrier extends LinearLayout {
     private TextView mCarrierText;
     private ImageView mMobileSignal;
     private ImageView mMobileRoaming;
-    private DualToneHandler mDualToneHandler;
     private ColorStateList mColorForegroundStateList;
     private float mColorForegroundIntensity;
     private CellSignalState mLastSignalState;
@@ -63,7 +61,6 @@ public class QSCarrier extends LinearLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mDualToneHandler = new DualToneHandler(getContext());
         mMobileGroup = findViewById(R.id.mobile_combo);
         mMobileSignal = findViewById(R.id.mobile_signal);
         mMobileRoaming = findViewById(R.id.mobile_roaming);
@@ -74,7 +71,6 @@ public class QSCarrier extends LinearLayout {
         int colorForeground = Utils.getColorAttrDefaultColor(mContext,
                 android.R.attr.colorForeground);
         mColorForegroundStateList = ColorStateList.valueOf(colorForeground);
-        mColorForegroundIntensity = QuickStatusBarHeader.getColorIntensity(colorForeground);
     }
 
     /**
@@ -88,10 +84,8 @@ public class QSCarrier extends LinearLayout {
         mMobileGroup.setVisibility(state.visible ? View.VISIBLE : View.GONE);
         if (state.visible) {
             mMobileRoaming.setVisibility(state.roaming ? View.VISIBLE : View.GONE);
-            ColorStateList colorStateList = ColorStateList.valueOf(
-                    mDualToneHandler.getSingleColor(mColorForegroundIntensity));
-            mMobileRoaming.setImageTintList(colorStateList);
-            mMobileSignal.setImageTintList(colorStateList);
+            mMobileRoaming.setImageTintList(mColorForegroundStateList);
+            mMobileSignal.setImageTintList(mColorForegroundStateList);
             mMobileSignal.setImageLevel(state.mobileSignalIconId);
 
             StringBuilder contentDescription = new StringBuilder();

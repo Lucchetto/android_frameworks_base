@@ -55,7 +55,6 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.settingslib.Utils;
 import com.android.systemui.BatteryMeterView;
-import com.android.systemui.DualToneHandler;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
@@ -110,7 +109,6 @@ public class QuickStatusBarHeader extends RelativeLayout implements
     protected QSTileHost mHost;
     private TintedIconManager mIconManager;
     private TouchAnimator mPrivacyChipAlphaAnimator;
-    private DualToneHandler mDualToneHandler;
     private final CommandQueue mCommandQueue;
 
     private LinearLayout mClockDateContainer, mStatusIconsContainer;
@@ -138,8 +136,6 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         super(context, attrs);
         mStatusBarIconController = statusBarIconController;
         mActivityStarter = activityStarter;
-        mDualToneHandler = new DualToneHandler(
-                new ContextThemeWrapper(context, R.style.QSHeaderTheme));
         mCommandQueue = commandQueue;
     }
 
@@ -177,10 +173,9 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         int colorForeground = Utils.getColorAttrDefaultColor(getContext(),
                 android.R.attr.colorForeground);
         float intensity = getColorIntensity(colorForeground);
-        int fillColor = mDualToneHandler.getSingleColor(intensity);
 
         // Set the correct tint for the status icons so they contrast
-        mIconManager.setTint(fillColor);
+        mIconManager.setTint(colorForeground);
 
         mClockView = findViewById(R.id.clock);
         mClockView.setOnClickListener(this);
@@ -402,8 +397,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         int colorForeground = Utils.getColorAttrDefaultColor(getContext(),
                 android.R.attr.colorForeground);
         float intensity = getColorIntensity(colorForeground);
-        int fillColor = mDualToneHandler.getSingleColor(intensity);
-        mBatteryRemainingIcon.onDarkChanged(tintArea, intensity, fillColor);
+        mBatteryRemainingIcon.onDarkChanged(tintArea, intensity, colorForeground);
     }
 
     public void setCallback(Callback qsPanelCallback) {
