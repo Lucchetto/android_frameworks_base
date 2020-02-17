@@ -50,14 +50,14 @@ public class QSCarrierTest extends SysuiTestCase {
 
     @Test
     public void testUpdateState_first() {
-        CellSignalState c = new CellSignalState(true, 0, "", "", false);
+        CellSignalState c = new CellSignalState(true, 0, "", "", false, 0, 0);
 
         assertTrue(mQSCarrier.updateState(c));
     }
 
     @Test
     public void testUpdateState_same() {
-        CellSignalState c = new CellSignalState(true, 0, "", "", false);
+        CellSignalState c = new CellSignalState(true, 0, "", "", false, 0, 0);
 
         assertTrue(mQSCarrier.updateState(c));
         assertFalse(mQSCarrier.updateState(c));

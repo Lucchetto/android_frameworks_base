@@ -38,6 +38,10 @@ public class QSCarrier extends LinearLayout {
     private TextView mCarrierText;
     private ImageView mMobileSignal;
     private ImageView mMobileRoaming;
+    private TextView mMobileType;
+    // A View with just a space to separate the carrier label and type of signal
+    private TextView mSpacer;
+    private ImageView mVolte;
     private ColorStateList mColorForegroundStateList;
     private float mColorForegroundIntensity;
     private CellSignalState mLastSignalState;
@@ -64,6 +68,9 @@ public class QSCarrier extends LinearLayout {
         mMobileGroup = findViewById(R.id.mobile_combo);
         mMobileSignal = findViewById(R.id.mobile_signal);
         mMobileRoaming = findViewById(R.id.mobile_roaming);
+        mMobileType = findViewById(R.id.mobile_type);
+        mSpacer = findViewById(R.id.spacer);
+        mVolte = findViewById(R.id.mobile_volte);
         mCarrierText = findViewById(R.id.qs_carrier_text);
 
         mMobileSignal.setImageDrawable(new SignalDrawable(mContext));
@@ -83,6 +90,8 @@ public class QSCarrier extends LinearLayout {
         mLastSignalState = state;
         mMobileGroup.setVisibility(state.visible ? View.VISIBLE : View.GONE);
         if (state.visible) {
+            mMobileType.setTextColor(mColorForegroundStateList);
+            mVolte.setImageTintList(mColorForegroundStateList);
             mMobileRoaming.setVisibility(state.roaming ? View.VISIBLE : View.GONE);
             mMobileRoaming.setImageTintList(mColorForegroundStateList);
             mMobileSignal.setImageTintList(mColorForegroundStateList);
@@ -92,6 +101,24 @@ public class QSCarrier extends LinearLayout {
             if (state.contentDescription != null) {
                 contentDescription.append(state.contentDescription).append(", ");
             }
+
+            if (state.typeId != 0 && state.typeContentDescription != null) {
+                mMobileType.setText(state.typeContentDescription);
+                mMobileType.setContentDescription(state.typeContentDescription);
+                mMobileType.setVisibility(View.VISIBLE);
+                mSpacer.setVisibility(View.VISIBLE);
+            } else {
+                mMobileType.setVisibility(View.GONE);
+                mSpacer.setVisibility(View.GONE);
+            }
+
+            if (state.volteId != 0) {
+                mVolte.setImageResource(state.volteId);
+                mVolte.setVisibility(View.VISIBLE);
+            } else {
+                mVolte.setVisibility(View.GONE);
+            }
+
             if (state.roaming) {
                 contentDescription
                         .append(mContext.getString(R.string.data_connection_roaming))

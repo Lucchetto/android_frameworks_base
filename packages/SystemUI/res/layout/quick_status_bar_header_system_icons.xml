@@ -85,6 +85,5 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/qs_clock_date_margin" />
-
     </LinearLayout>
 </LinearLayout>

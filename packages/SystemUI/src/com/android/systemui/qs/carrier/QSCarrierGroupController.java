@@ -85,8 +85,10 @@ public class QSCarrierGroupController {
                             statusIcon.visible,
                             statusIcon.icon,
                             statusIcon.contentDescription,
-                            typeContentDescription.toString(),
-                            roaming
+                            (description != null) ? typeContentDescriptionHtml.toString() : null,
+                            roaming,
+                            statusType,
+                            volteIcon
                     );
                     mMainHandler.obtainMessage(H.MSG_UPDATE_STATE).sendToTarget();
                 }
