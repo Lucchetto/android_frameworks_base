@@ -24,12 +24,10 @@
     android:layout_gravity="@integer/notification_panel_layout_gravity"
     android:background="@android:color/transparent"
     android:baselineAligned="false"
+    android:paddingTop="@*android:dimen/qs_status_bar_top_padding"
     android:clickable="false"
     android:clipChildren="false"
     android:clipToPadding="false"
-    android:paddingTop="0dp"
-    android:paddingEnd="0dp"
-    android:paddingStart="0dp"
     android:elevation="4dp" >
 
     <!-- The clock -->

@@ -75,7 +75,6 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
     private KeyguardStateController mKeyguardStateController;
     private final ScreenLifecycle mScreenLifecycle;
     private final TileQueryHelper mTileQueryHelper;
-    private final View mTransparentView;
 
     private boolean isShown;
     private QSTileHost mHost;
@@ -118,7 +117,6 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
                 mContext.getString(com.android.internal.R.string.reset));
         mToolbar.setTitle(R.string.qs_edit);
         mRecyclerView = findViewById(android.R.id.list);
-        mTransparentView = findViewById(R.id.customizer_transparent_view);
         mTileAdapter = new TileAdapter(getContext(), uiEventLogger);
         mTileQueryHelper = tileQueryHelper;
         mTileQueryHelper.setListener(mTileAdapter);
@@ -149,14 +147,6 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         updateNavBackDrop(newConfig);
-        updateResources();
-    }
-
-    private void updateResources() {
-        LayoutParams lp = (LayoutParams) mTransparentView.getLayoutParams();
-        lp.height = mContext.getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.qs_status_bar_height);
-        mTransparentView.setLayoutParams(lp);
     }
 
     private void updateNavBackDrop(Configuration newConfig) {

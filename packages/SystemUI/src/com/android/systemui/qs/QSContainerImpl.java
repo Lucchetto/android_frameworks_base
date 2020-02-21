@@ -192,10 +192,17 @@ public class QSContainerImpl extends FrameLayout {
     }
 
     private void updateResources() {
+        final int topMargin = mContext.getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.qs_status_bar_top_padding)
+                + mContext.getResources().getDimensionPixelSize(
+                        com.android.internal.R.dimen.qs_status_bar_height);
+
         LayoutParams layoutParams = (LayoutParams) mQSPanelContainer.getLayoutParams();
-        layoutParams.topMargin = mContext.getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.qs_status_bar_height);
+        layoutParams.topMargin = topMargin;
         mQSPanelContainer.setLayoutParams(layoutParams);
+        
+        setTopMargin(mQSDetail, topMargin);
+        setTopMargin(mQSCustomizer, topMargin);
 
         mSideMargins = getResources().getDimensionPixelSize(R.dimen.notification_side_paddings);
         mContentPaddingStart = getResources().getDimensionPixelSize(
@@ -207,6 +214,12 @@ public class QSContainerImpl extends FrameLayout {
         if (marginsChanged) {
             updatePaddingsAndMargins();
         }
+    }
+
+    private void setTopMargin(View view, int topMargin) {
+        FrameLayout.LayoutParams lp = (LayoutParams) view.getLayoutParams();
+        lp.topMargin = topMargin;
+        view.setLayoutParams(lp);
     }
 
     /**
