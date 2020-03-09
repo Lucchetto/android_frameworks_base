@@ -31,6 +31,5 @@
     <bool name="use_lock_pattern_drawable">false</bool>
     <bool name="resolver_landscape_phone">true</bool>
 
-    <!-- Recognizing fingerprint animation -->
-    <dimen name="fod_animation_size">280dp</dimen>
 </resources>
+
