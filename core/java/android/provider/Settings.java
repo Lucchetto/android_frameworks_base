@@ -9251,6 +9251,12 @@ public final class Settings {
          */
         public static final int ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW = 0x2;
 
+        /** 
+         * Whether face unlock is allowed only on security view.
+         * @hide
+         */
+        public static final String FACE_UNLOCK_ALWAYS_REQUIRE_SWIPE = "face_unlock_always_require_swipe";
+
         /**
          * Whether the Adaptive connectivity option is enabled.
          *
