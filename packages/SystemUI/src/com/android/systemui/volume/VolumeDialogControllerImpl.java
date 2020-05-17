@@ -54,6 +54,8 @@ import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
 import android.view.accessibility.AccessibilityManager;
+import android.widget.FrameLayout;
+import android.widget.FrameLayout.LayoutParams;
 
 import androidx.lifecycle.Observer;
 
@@ -150,6 +152,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     protected final BroadcastDispatcher mBroadcastDispatcher;
 
     private QuickMediaPlayer mMediaPlayer;
+    private FrameLayout mMediaPlayerLayout;
 
     @Inject
     public VolumeDialogControllerImpl(Context context, BroadcastDispatcher broadcastDispatcher,
@@ -190,6 +193,11 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         mVolumeController.setA11yMode(accessibilityVolumeStreamActive ?
                     VolumePolicy.A11Y_MODE_INDEPENDENT_A11Y_VOLUME :
                         VolumePolicy.A11Y_MODE_MEDIA_A11Y_VOLUME);
+
+        mMediaPlayerLayout = new FrameLayout(context);
+        setMediaPlayerLayoutParams();
+        mMediaPlayer = new QuickMediaPlayer(context, mMediaPlayerLayout);
+        mMediaPlayerLayout.addView(mMediaPlayer.getView());
     }
 
     public AudioManager getAudioManager() {
@@ -198,6 +206,17 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
 
     public QuickMediaPlayer getMediaPlayer() {
         return mMediaPlayer;
+    }
+
+    protected void setMediaPlayerLayoutParams() {
+        LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT,
+                mContext.getResources().getDimensionPixelSize(R.dimen.volume_dialog_media_player_height));
+        lp.setMargins(0, mContext.getResources().getDimensionPixelSize(R.dimen.volume_dialog_spacer), 0, 0);
+        mMediaPlayerLayout.setLayoutParams(lp);
+    }
+
+    protected FrameLayout getMediaPlayerLayout() {
+        return mMediaPlayerLayout;
     }
 
     public void dismiss() {

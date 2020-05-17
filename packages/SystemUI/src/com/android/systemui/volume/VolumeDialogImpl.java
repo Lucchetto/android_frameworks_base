@@ -135,7 +135,7 @@ public class VolumeDialogImpl implements VolumeDialog,
 
     private final Context mContext;
     private final H mHandler = new H();
-    private final VolumeDialogController mController;
+    private final VolumeDialogControllerImpl mController;
     private final DeviceProvisionedController mDeviceProvisionedController;
 
     private Window mWindow;
@@ -198,7 +198,7 @@ public class VolumeDialogImpl implements VolumeDialog,
     public VolumeDialogImpl(Context context) {
         mContext =
                 new ContextThemeWrapper(context, R.style.qs_theme);
-        mController = Dependency.get(VolumeDialogController.class);
+        mController = (VolumeDialogControllerImpl) Dependency.get(VolumeDialogController.class);
         mKeyguard = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
         mActivityManager = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
         mAccessibilityMgr = Dependency.get(AccessibilityManagerWrapper.class);
@@ -317,6 +317,7 @@ public class VolumeDialogImpl implements VolumeDialog,
         mDialog.findViewById(R.id.volume_container).setClipToOutline(true);
         mDialogRowsView = mDialog.findViewById(R.id.volume_dialog_rows);
         mRinger = mDialog.findViewById(R.id.ringer);
+        mDialogView.addView(mController.getMediaPlayerLayout());
 
         LayoutTransition lt = new LayoutTransition();
         lt.disableTransitionType(LayoutTransition.DISAPPEARING);
