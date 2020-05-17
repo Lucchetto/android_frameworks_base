@@ -209,7 +209,8 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     }
 
     protected void setMediaPlayerLayoutParams() {
-        LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT,
+        int width = mContext.getResources().getDimensionPixelSize(R.dimen.volume_dialog_panel_width) * 3;
+        LayoutParams lp = new LayoutParams(width,
                 mContext.getResources().getDimensionPixelSize(R.dimen.volume_dialog_media_player_height));
         lp.setMargins(0, mContext.getResources().getDimensionPixelSize(R.dimen.volume_dialog_spacer), 0, 0);
         mMediaPlayerLayout.setLayoutParams(lp);
