@@ -60,6 +60,7 @@ import androidx.lifecycle.Observer;
 import com.android.internal.annotations.GuardedBy;
 import com.android.settingslib.volume.MediaSessions;
 import com.android.systemui.Dumpable;
+import com.android.systemui.media.QuickMediaPlayer;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
@@ -148,6 +149,8 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     protected final VC mVolumeController = new VC();
     protected final BroadcastDispatcher mBroadcastDispatcher;
 
+    private QuickMediaPlayer mMediaPlayer;
+
     @Inject
     public VolumeDialogControllerImpl(Context context, BroadcastDispatcher broadcastDispatcher,
             Optional<Lazy<StatusBar>> statusBarOptionalLazy, RingerModeTracker ringerModeTracker) {
@@ -191,6 +194,10 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
 
     public AudioManager getAudioManager() {
         return mAudio;
+    }
+
+    public QuickMediaPlayer getMediaPlayer() {
+        return mMediaPlayer;
     }
 
     public void dismiss() {

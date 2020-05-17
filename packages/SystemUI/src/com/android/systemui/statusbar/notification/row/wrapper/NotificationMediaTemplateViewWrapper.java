@@ -20,6 +20,7 @@ import static com.android.systemui.Dependency.MAIN_HANDLER;
 
 import android.annotation.Nullable;
 import android.app.Notification;
+import android.app.Notification.Builder;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
@@ -43,6 +44,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.widget.MediaNotificationView;
 import com.android.systemui.Dependency;
+import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.qs.QuickQSPanel;
 import com.android.systemui.statusbar.NotificationMediaManager;
@@ -50,6 +52,7 @@ import com.android.systemui.statusbar.TransformableView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
 import com.android.systemui.util.Utils;
+import com.android.systemui.volume.VolumeDialogControllerImpl;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -177,6 +180,18 @@ public class NotificationMediaTemplateViewWrapper extends NotificationTemplateVi
 
         final MediaSession.Token token = mRow.getEntry().getSbn().getNotification().extras
                 .getParcelable(Notification.EXTRA_MEDIA_SESSION);
+
+        if (token != null) {
+            StatusBarNotification sbn = mRow.getEntry().notification;
+            Notification notification = sbn.getNotification();
+            String headerAppName = Builder.recoverBuilder(mContext, notification).loadHeaderAppName();
+            int[] intArray = notification.extras.getIntArray("android.compactActions");
+            int originalIconColor = getNotificationHeader().getOriginalIconColor();
+            final VolumeDialogControllerImpl mController = (VolumeDialogControllerImpl) Dependency.get(VolumeDialogController.class);
+            int i = originalIconColor;
+            mController.getMediaPlayer().setMediaSession(token, notification.getSmallIcon(), i, mBackgroundColor,
+                    mActions, intArray, notification.contentIntent, headerAppName);
+        }
 
         boolean showCompactSeekbar = mMediaManager.getShowCompactMediaSeekbar();
         if (token == null || (COMPACT_MEDIA_TAG.equals(mView.getTag()) && !showCompactSeekbar)) {
