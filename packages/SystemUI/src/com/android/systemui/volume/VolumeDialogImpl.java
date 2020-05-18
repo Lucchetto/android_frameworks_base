@@ -273,6 +273,7 @@ public class VolumeDialogImpl implements VolumeDialog,
         lp.width = MATCH_PARENT;
         lp.height = WRAP_CONTENT;
         lp.format = PixelFormat.TRANSLUCENT;
+        lp.y = mContext.getResources().getDimensionPixelSize(R.dimen.volume_dialog_panel_window_margin);
         lp.setTitle(VolumeDialogImpl.class.getSimpleName());
         lp.windowAnimations = -1;
         if(!isAudioPanelOnLeftSide()){

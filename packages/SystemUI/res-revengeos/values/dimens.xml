@@ -45,6 +45,7 @@
     <!-- Volume dialog -->
     <dimen name="volume_dialog_panel_transparent_padding_left_right">8dp</dimen>
     <dimen name="volume_dialog_panel_transparent_padding">20dp</dimen>
+    <dimen name="volume_dialog_panel_window_margin">0dp</dimen>
     <dimen name="volume_dialog_panel_width">52dp</dimen>
     <dimen name="volume_dialog_slider_height">210dp</dimen>
     <dimen name="volume_dialog_icon_padding">13dp</dimen>
