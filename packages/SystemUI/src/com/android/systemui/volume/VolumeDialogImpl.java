@@ -107,6 +107,8 @@ import com.android.systemui.statusbar.phone.ExpandableIndicator;
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
+import com.android.systemui.media.QuickMediaPlayer;
+import android.widget.FrameLayout;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -188,9 +190,13 @@ public class VolumeDialogImpl implements VolumeDialog,
 
     private boolean mExpanded;
     private boolean mShowingMediaDevices;
+    private boolean mShowingMediaPlayer;
 
     private float mElevation;
     private float mHeight, mWidth, mSpacer;
+
+    private QuickMediaPlayer mMediaPlayer;
+    private FrameLayout mMediaPlayerLayout;
 
     private final List<MediaOutputRow> mMediaOutputRows = new ArrayList<>();
     private final List<MediaDevice> mMediaDevices = new ArrayList<>();
@@ -317,7 +323,9 @@ public class VolumeDialogImpl implements VolumeDialog,
         mDialog.findViewById(R.id.volume_container).setClipToOutline(true);
         mDialogRowsView = mDialog.findViewById(R.id.volume_dialog_rows);
         mRinger = mDialog.findViewById(R.id.ringer);
-        mDialogView.addView(mController.getMediaPlayerLayout());
+
+        mMediaPlayerLayout = mController.getMediaPlayerLayout();
+        mMediaPlayer = mController.getMediaPlayer();
 
         LayoutTransition lt = new LayoutTransition();
         lt.disableTransitionType(LayoutTransition.DISAPPEARING);
@@ -466,6 +474,13 @@ public class VolumeDialogImpl implements VolumeDialog,
             }
         }
         animateViewOut(mSettingsButton, false, width, z);
+
+
+        if  (mShowingMediaPlayer){
+            mShowingMediaPlayer = false;
+            mDialogView.removeView(mMediaPlayerLayout);
+        }
+
         if (mShowingMediaDevices) {
             mDialogRowsView.setAlpha(1f);
             mMediaTitleText.setSelected(false);
@@ -629,6 +644,12 @@ public class VolumeDialogImpl implements VolumeDialog,
                             animateViewIn(alarm.view, isAlarmVisible, width, z);
                         }
                     }
+
+                    if  (mMediaPlayer.isPlaying()){
+                        mShowingMediaPlayer = true;
+                        mDialogView.addView(mMediaPlayerLayout);
+                    }
+
                     animateViewIn(mSettingsButton, false, 0, z);
 
                     provideTouchHapticH(VibrationEffect.get(VibrationEffect.EFFECT_TICK));
