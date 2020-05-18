@@ -20,4 +20,17 @@
         <item name="android:fontFamily">@*android:string/config_headlineFontFamilyMedium</item>
         <item name="android:minHeight">@dimen/min_qs_big_clock_container_size</item>
     </style>
+
+    <style name="TextAppearance.MediaPlayer">
+        <item name="android:textSize">15sp</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:ellipsize">marquee</item>
+        <item name="android:marqueeRepeatLimit">marquee_forever</item>
+    </style>
+
+    <style name="TextAppearance.MediaPlayer.Title" parent="TextAppearance.MediaPlayer">
+    <item name="android:textSize">18sp</item>
+    <item name="android:fontFamily">@*android:string/config_headlineFontFamilyMedium</item>
+    </style>
 </resources>

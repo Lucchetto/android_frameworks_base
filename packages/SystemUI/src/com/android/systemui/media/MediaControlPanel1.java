@@ -127,13 +127,13 @@ public class MediaControlPanel implements MediaListener {
         Drawable loadDrawable = icon.loadDrawable(mContext);
         loadDrawable.setTint(mForegroundColor);
         imageView2.setImageDrawable(loadDrawable);
-        TextView textView = (TextView) mMediaNotifView.findViewById(R.id.header_title);
+        TextView textView = (TextView) mMediaNotifView.findViewById(R.id.media_artist);
         textView.setText(mMetadata.getString("android.media.metadata.ARTIST"));
         textView.setTextColor(mForegroundColor);
         TextView textView2 = (TextView) mMediaNotifView.findViewById(R.id.app_name);
         textView2.setText(str);
         textView2.setTextColor(mForegroundColor);
-        TextView textView3 = (TextView) mMediaNotifView.findViewById(R.id.header_text);
+        TextView textView3 = (TextView) mMediaNotifView.findViewById(R.id.media_title);
         textView3.setText(mMetadata.getString("android.media.metadata.TITLE"));
         textView3.setTextColor(mForegroundColor);
         textView3.setSelected(true);
