@@ -69,6 +69,7 @@ public class MediaControlPanel implements MediaListener {
     private Token mToken;
     private int mWidth;
     private int mHeight;
+    private boolean mIsPlaybackActive;
 
     public MediaControlPanel(Context context, ViewGroup viewGroup, int i, int[] iArr) {
         mContext = context;
@@ -109,6 +110,7 @@ public class MediaControlPanel implements MediaListener {
         }
 
         updateArtwork();
+        mIsPlaybackActive = true;
 
         if (pendingIntent != null) {
             mMediaNotifView.setOnClickListener(new OnClickListener() {
@@ -218,6 +220,14 @@ public class MediaControlPanel implements MediaListener {
         return (mediaController == null || mediaController.getPlaybackState() == null) ? false : true;
     }
 
+    public boolean isPlaybackActive() {
+        return mIsPlaybackActive;
+    }
+
+    public void setPlaybackActive(boolean active) {
+        mIsPlaybackActive = active;
+    }
+
     public boolean isPlaying() {
         return isPlaying(mController);
     }
@@ -231,7 +241,7 @@ public class MediaControlPanel implements MediaListener {
         if (playbackState == null) {
             return false;
         }
-        if (playbackState.getState() == 3) {
+        if (playbackState.getState() == PlaybackState.STATE_PLAYING) {
             z = true;
         }
         return z;
@@ -280,7 +290,7 @@ public class MediaControlPanel implements MediaListener {
 
     @Override
     public void onMetadataOrStateChanged(MediaMetadata mediaMetadata, @PlaybackState.State int state) {
-        if (state == 0) {
+        if (state == PlaybackState.STATE_NONE) {
             clearControls();
             mMediaManager.removeCallback(this);
         }

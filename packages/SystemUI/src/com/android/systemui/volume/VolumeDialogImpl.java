@@ -194,7 +194,8 @@ public class VolumeDialogImpl implements VolumeDialog,
     private float mElevation;
     private float mHeight, mWidth, mSpacer;
 
-    private View mMediaPlayer;
+    private View mMediaPlayerView;
+    private QuickMediaPlayer mMediaPlayer;
     private FrameLayout mMediaPlayerLayout;
 
     private final List<MediaOutputRow> mMediaOutputRows = new ArrayList<>();
@@ -222,6 +223,8 @@ public class VolumeDialogImpl implements VolumeDialog,
                 mLocalMediaManager.registerCallback(VolumeDialogImpl.this);
             }
         }, 3000);
+        
+        mMediaPlayer = mController.getMediaPlayer();
     }
 
     @Override
@@ -326,9 +329,9 @@ public class VolumeDialogImpl implements VolumeDialog,
 
         if (!isLandscape()) {
             mMediaPlayerLayout = mController.getMediaPlayerLayout();
-            mMediaPlayer = mController.getMediaPlayer().getView();
-            mMediaPlayer.setVisibility(GONE);
-            mMediaPlayerLayout.addView(mMediaPlayer);
+            mMediaPlayerView = mMediaPlayer.getView();
+            mMediaPlayerView.setVisibility(GONE);
+            mMediaPlayerLayout.addView(mMediaPlayerView);
             mDialogView.addView(mMediaPlayerLayout);
         }
 
@@ -485,7 +488,7 @@ public class VolumeDialogImpl implements VolumeDialog,
         }
         animateViewOut(mSettingsButton, false, width, z);
 
-        mMediaPlayer.setVisibility(GONE);
+        mMediaPlayerView.setVisibility(GONE);
 
         if (mShowingMediaDevices) {
             mDialogRowsView.setAlpha(1f);
@@ -651,7 +654,9 @@ public class VolumeDialogImpl implements VolumeDialog,
                         }
                     }
 
-                    mMediaPlayer.setVisibility(VISIBLE);
+                    if (mMediaPlayer.isPlaybackActive()) {
+                        mMediaPlayerView.setVisibility(VISIBLE);
+                    }
 
                     animateViewIn(mSettingsButton, false, 0, z);
 
