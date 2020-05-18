@@ -195,6 +195,8 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
                         VolumePolicy.A11Y_MODE_MEDIA_A11Y_VOLUME);
 
         mMediaPlayerLayout = new FrameLayout(context);
+        mMediaPlayerLayout.setClipChildren(false);
+        mMediaPlayerLayout.setClipToPadding(false);
         mMediaPlayer = new QuickMediaPlayer(context, mMediaPlayerLayout);
         setMediaPlayerLayoutParams();
     }

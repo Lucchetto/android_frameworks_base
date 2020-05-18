@@ -9,10 +9,12 @@ import android.content.pm.ResolveInfo;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
+import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.Icon;
-import android.graphics.drawable.RippleDrawable;
+import android.graphics.Paint;
+import android.graphics.Paint.Style;
 import android.graphics.Rect;
 import android.media.MediaMetadata;
 import android.media.session.MediaController;
@@ -36,17 +38,14 @@ import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
 import com.android.settingslib.widget.AdaptiveIcon;
 import com.android.systemui.R;
 import com.android.systemui.Dependency;
-import com.android.systemui.ImageUtilities;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.shared.system.BackgroundExecutor;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationMediaManager.MediaListener;
 
 import java.util.List;
-import java.util.concurrent.Executor;
 
 public class MediaControlPanel implements MediaListener {
-    public final static float BITMAP_SCALE = 0.35f;
     protected static final int[] NOTIF_ACTION_IDS = { com.android.internal.R.id.action0,
             com.android.internal.R.id.action1, com.android.internal.R.id.action2, com.android.internal.R.id.action3,
             com.android.internal.R.id.action4 };
@@ -57,7 +56,6 @@ public class MediaControlPanel implements MediaListener {
     private MediaController mController;
     private MediaMetadata mMetadata;
     private int mForegroundColor;
-    private final Executor mForegroundExecutor;
     private final NotificationMediaManager mMediaManager;
     protected LinearLayout mMediaNotifView;
     protected ComponentName mRecvComponent;
@@ -72,13 +70,11 @@ public class MediaControlPanel implements MediaListener {
     private int mWidth;
     private int mHeight;
 
-    public MediaControlPanel(Context context, ViewGroup viewGroup,
-            int i, int[] iArr) {
+    public MediaControlPanel(Context context, ViewGroup viewGroup, int i, int[] iArr) {
         mContext = context;
         mMediaNotifView = (LinearLayout) LayoutInflater.from(context).inflate(i, viewGroup, false);
         mMediaManager = Dependency.get(NotificationMediaManager.class);
         mActionIds = iArr;
-        mForegroundExecutor = context.getMainExecutor();
         mBackgroundExecutor = BackgroundExecutor.get();
     }
 
@@ -140,6 +136,7 @@ public class MediaControlPanel implements MediaListener {
         TextView textView3 = (TextView) mMediaNotifView.findViewById(R.id.header_text);
         textView3.setText(mMetadata.getString("android.media.metadata.TITLE"));
         textView3.setTextColor(mForegroundColor);
+        textView3.setSelected(true);
         mMediaManager.removeCallback(this);
         mMediaManager.addCallback(this);
     }
@@ -151,34 +148,34 @@ public class MediaControlPanel implements MediaListener {
         mBackgroundExecutor.submit(new Runnable() {
             @Override
             public final void run() {
-                RoundedBitmapDrawable roundedBitmapDrawable;
                 Bitmap bitmap = mMetadata.getBitmap("android.media.metadata.ALBUM_ART");
-                float dimension = mContext.getResources().getDimension(R.dimen.volume_dialog_panel_radius);
+                float radius = mContext.getResources().getDimension(R.dimen.volume_dialog_panel_radius);
                 if (bitmap == null || mWidth <= 0 || mHeight <= 0) {
                     Log.e("MediaControlPanel", "No album art available");
-                    roundedBitmapDrawable = null;
+                    GradientDrawable gradientDrawable = new GradientDrawable();
+                    gradientDrawable.setCornerRadius(radius);
+                    gradientDrawable.setColor(mBackgroundColor);
+                    mMediaNotifView.setBackground(gradientDrawable);
                 } else {
-                    roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(mContext.getResources(),
-                            ImageUtilities.blurImage(mContext, scaleBitmap(bitmap, mWidth, mHeight)));
-                    roundedBitmapDrawable.setCornerRadius(dimension);
+                    bitmap = scaleBitmap(bitmap, mWidth, mHeight);
+                    Canvas canvas = new Canvas(bitmap);
+                    Paint paint = new Paint();
+                    paint.setStyle(Style.FILL);
+                    paint.setColor(mBackgroundColor);
+                    paint.setAlpha(215);
+                    canvas.drawRect(0.0f, 0.0f, (float) canvas.getWidth(), (float) canvas.getHeight(), paint);
+                    RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(mContext.getResources(), bitmap);
+                    roundedBitmapDrawable.setCornerRadius(radius);
+                    mMediaNotifView.setBackground(roundedBitmapDrawable);
                 }
-                mForegroundExecutor.execute(new Runnable() {
-                    @Override
-                    public final void run() {
-                        if (roundedBitmapDrawable != null) {
-                            mMediaNotifView.setBackground(roundedBitmapDrawable);
-                        }
-                        mMediaNotifView.setBackgroundTintList(ColorStateList.valueOf(mBackgroundColor));
-                    }
-                });
             }
         });
     }
 
     public void setArtworkSize(int w, int h) {
         if (w != mWidth || h != mHeight) {
-            mWidth = Math.round((w * BITMAP_SCALE));
-            mHeight = Math.round((h * BITMAP_SCALE));   
+            mWidth = w;
+            mHeight = h;
             updateArtwork();
         }
     }
@@ -247,7 +244,7 @@ public class MediaControlPanel implements MediaListener {
             if (i < iArr.length) {
                 ImageButton imageButton = (ImageButton) mMediaNotifView.findViewById(iArr[i]);
                 if (imageButton != null) {
-                    imageButton.setVisibility(8);
+                    imageButton.setVisibility(View.GONE);
                 }
                 i++;
             } else {
