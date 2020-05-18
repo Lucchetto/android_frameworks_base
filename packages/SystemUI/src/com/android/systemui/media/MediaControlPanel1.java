@@ -36,6 +36,7 @@ import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
 import com.android.settingslib.widget.AdaptiveIcon;
 import com.android.systemui.R;
 import com.android.systemui.Dependency;
+import com.android.systemui.ImageUtilities;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.shared.system.BackgroundExecutor;
 import com.android.systemui.statusbar.NotificationMediaManager;
@@ -45,6 +46,7 @@ import java.util.List;
 import java.util.concurrent.Executor;
 
 public class MediaControlPanel implements MediaListener {
+    public final static float BITMAP_SCALE = 0.35f;
     protected static final int[] NOTIF_ACTION_IDS = { com.android.internal.R.id.action0,
             com.android.internal.R.id.action1, com.android.internal.R.id.action2, com.android.internal.R.id.action3,
             com.android.internal.R.id.action4 };
@@ -53,6 +55,7 @@ public class MediaControlPanel implements MediaListener {
     private final BackgroundExecutor mBackgroundExecutor;
     private Context mContext;
     private MediaController mController;
+    private MediaMetadata mMetadata;
     private int mForegroundColor;
     private final Executor mForegroundExecutor;
     private final NotificationMediaManager mMediaManager;
@@ -66,6 +69,8 @@ public class MediaControlPanel implements MediaListener {
         }
     };
     private Token mToken;
+    private int mWidth;
+    private int mHeight;
 
     public MediaControlPanel(Context context, ViewGroup viewGroup,
             int i, int[] iArr) {
@@ -91,7 +96,7 @@ public class MediaControlPanel implements MediaListener {
         mBackgroundColor = i2;
         MediaController mediaController = new MediaController(mContext, mToken);
         mController = mediaController;
-        MediaMetadata metadata = mediaController.getMetadata();
+        mMetadata = mediaController.getMetadata();
         List<ResolveInfo> queryBroadcastReceiversAsUser = mContext.getPackageManager()
                 .queryBroadcastReceiversAsUser(new Intent("android.intent.action.MEDIA_BUTTON"), 0, mContext.getUser());
         if (queryBroadcastReceiversAsUser != null) {
@@ -102,43 +107,13 @@ public class MediaControlPanel implements MediaListener {
             }
         }
         mController.registerCallback(mSessionCallback);
-        if (metadata == null) {
+        if (mMetadata == null) {
             Log.e("MediaControlPanel", "Media metadata was null");
             return;
         }
 
-        mBackgroundExecutor.submit(new Runnable() {
-            @Override
-            public final void run() {
-                RoundedBitmapDrawable roundedBitmapDrawable;
-                Bitmap bitmap = metadata.getBitmap("android.media.metadata.ALBUM_ART");
-                float dimension = mContext.getResources().getDimension(R.dimen.qs_media_corner_radius);
-                Rect rect = new Rect();
-                mMediaNotifView.getBoundsOnScreen(rect);
-                int width = rect.width();
-                int height = rect.height();
-                if (bitmap == null || width <= 0 || height <= 0) {
-                    Log.e("MediaControlPanel", "No album art available");
-                    roundedBitmapDrawable = null;
-                } else {
-                    roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(mContext.getResources(),
-                            Bitmap.createScaledBitmap(bitmap.copy(Config.ARGB_8888, true), width, height, false));
-                    roundedBitmapDrawable.setCornerRadius(dimension);
-                }
-                mForegroundExecutor.execute(new Runnable() {
-                    @Override
-                    public final void run() {
-                        if (roundedBitmapDrawable != null) {
-                            mMediaNotifView.setBackground(roundedBitmapDrawable);
-                            return;
-                        }
-                        mMediaNotifView.setBackgroundTintList(ColorStateList.valueOf(mBackgroundColor));
-                    }
-                });
-            }
-        });
+        updateArtwork();
 
-        mMediaNotifView.setBackgroundTintList(ColorStateList.valueOf(mBackgroundColor));
         if (pendingIntent != null) {
             mMediaNotifView.setOnClickListener(new OnClickListener() {
                 @Override
@@ -157,16 +132,76 @@ public class MediaControlPanel implements MediaListener {
         loadDrawable.setTint(mForegroundColor);
         imageView2.setImageDrawable(loadDrawable);
         TextView textView = (TextView) mMediaNotifView.findViewById(R.id.header_title);
-        textView.setText(metadata.getString("android.media.metadata.ARTIST"));
+        textView.setText(mMetadata.getString("android.media.metadata.ARTIST"));
         textView.setTextColor(mForegroundColor);
         TextView textView2 = (TextView) mMediaNotifView.findViewById(R.id.app_name);
         textView2.setText(str);
         textView2.setTextColor(mForegroundColor);
         TextView textView3 = (TextView) mMediaNotifView.findViewById(R.id.header_text);
-        textView3.setText(metadata.getString("android.media.metadata.TITLE"));
+        textView3.setText(mMetadata.getString("android.media.metadata.TITLE"));
         textView3.setTextColor(mForegroundColor);
         mMediaManager.removeCallback(this);
         mMediaManager.addCallback(this);
+    }
+
+    private void updateArtwork() {
+        if (mMetadata == null) {
+            return;
+        }
+        mBackgroundExecutor.submit(new Runnable() {
+            @Override
+            public final void run() {
+                RoundedBitmapDrawable roundedBitmapDrawable;
+                Bitmap bitmap = mMetadata.getBitmap("android.media.metadata.ALBUM_ART");
+                float dimension = mContext.getResources().getDimension(R.dimen.volume_dialog_panel_radius);
+                if (bitmap == null || mWidth <= 0 || mHeight <= 0) {
+                    Log.e("MediaControlPanel", "No album art available");
+                    roundedBitmapDrawable = null;
+                } else {
+                    roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(mContext.getResources(),
+                            ImageUtilities.blurImage(mContext, scaleBitmap(bitmap, mWidth, mHeight)));
+                    roundedBitmapDrawable.setCornerRadius(dimension);
+                }
+                mForegroundExecutor.execute(new Runnable() {
+                    @Override
+                    public final void run() {
+                        if (roundedBitmapDrawable != null) {
+                            mMediaNotifView.setBackground(roundedBitmapDrawable);
+                        }
+                        mMediaNotifView.setBackgroundTintList(ColorStateList.valueOf(mBackgroundColor));
+                    }
+                });
+            }
+        });
+    }
+
+    public void setArtworkSize(int w, int h) {
+        if (w != mWidth || h != mHeight) {
+            mWidth = Math.round((w * BITMAP_SCALE));
+            mHeight = Math.round((h * BITMAP_SCALE));   
+            updateArtwork();
+        }
+    }
+
+    private Bitmap scaleBitmap(Bitmap image, int maxWidth, int maxHeight) {
+        if (maxHeight > 0 && maxWidth > 0) {
+            int width = image.getWidth();
+            int height = image.getHeight();
+            float ratioBitmap = (float) width / (float) height;
+            float ratioMax = (float) maxWidth / (float) maxHeight;
+
+            int finalWidth = maxWidth;
+            int finalHeight = maxHeight;
+            if (ratioMax > ratioBitmap) {
+                finalWidth = (int) ((float) maxHeight * ratioBitmap);
+            } else {
+                finalHeight = (int) ((float) maxWidth / ratioBitmap);
+            }
+            image = Bitmap.createScaledBitmap(image.copy(Config.ARGB_8888, true), finalWidth, finalHeight, true);
+            return image;
+        } else {
+            return image;
+        }
     }
 
     public Token getMediaSessionToken() {

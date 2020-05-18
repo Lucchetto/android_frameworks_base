@@ -195,9 +195,8 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
                         VolumePolicy.A11Y_MODE_MEDIA_A11Y_VOLUME);
 
         mMediaPlayerLayout = new FrameLayout(context);
-        setMediaPlayerLayoutParams();
         mMediaPlayer = new QuickMediaPlayer(context, mMediaPlayerLayout);
-        mMediaPlayerLayout.addView(mMediaPlayer.getView());
+        setMediaPlayerLayoutParams();
     }
 
     public AudioManager getAudioManager() {
@@ -210,10 +209,13 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
 
     protected void setMediaPlayerLayoutParams() {
         int width = mContext.getResources().getDimensionPixelSize(R.dimen.volume_dialog_panel_width) * 3;
+        int height = mContext.getResources().getDimensionPixelSize(R.dimen.volume_dialog_media_player_height);
         LayoutParams lp = new LayoutParams(width,
-                mContext.getResources().getDimensionPixelSize(R.dimen.volume_dialog_media_player_height));
+                height);
         lp.setMargins(0, mContext.getResources().getDimensionPixelSize(R.dimen.volume_dialog_spacer), 0, 0);
         mMediaPlayerLayout.setLayoutParams(lp);
+        mMediaPlayer.setArtworkSize(width, height);
+
     }
 
     protected FrameLayout getMediaPlayerLayout() {

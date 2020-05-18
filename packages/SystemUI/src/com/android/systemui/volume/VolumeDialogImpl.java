@@ -190,12 +190,11 @@ public class VolumeDialogImpl implements VolumeDialog,
 
     private boolean mExpanded;
     private boolean mShowingMediaDevices;
-    private boolean mShowingMediaPlayer;
 
     private float mElevation;
     private float mHeight, mWidth, mSpacer;
 
-    private QuickMediaPlayer mMediaPlayer;
+    private View mMediaPlayer;
     private FrameLayout mMediaPlayerLayout;
 
     private final List<MediaOutputRow> mMediaOutputRows = new ArrayList<>();
@@ -324,8 +323,13 @@ public class VolumeDialogImpl implements VolumeDialog,
         mDialogRowsView = mDialog.findViewById(R.id.volume_dialog_rows);
         mRinger = mDialog.findViewById(R.id.ringer);
 
-        mMediaPlayerLayout = mController.getMediaPlayerLayout();
-        mMediaPlayer = mController.getMediaPlayer();
+        if (!isLandscape()) {
+            mMediaPlayerLayout = mController.getMediaPlayerLayout();
+            mMediaPlayer = mController.getMediaPlayer().getView();
+            mMediaPlayer.setVisibility(GONE);
+            mMediaPlayerLayout.addView(mMediaPlayer);
+            mDialogView.addView(mMediaPlayerLayout);
+        }
 
         LayoutTransition lt = new LayoutTransition();
         lt.disableTransitionType(LayoutTransition.DISAPPEARING);
@@ -394,6 +398,11 @@ public class VolumeDialogImpl implements VolumeDialog,
         float alpha = ta.getFloat(0, 0);
         ta.recycle();
         return (int) (alpha * 255);
+    }
+
+    private boolean isLandscape() {
+        return mContext.getResources().getConfiguration().orientation ==
+                Configuration.ORIENTATION_LANDSCAPE;
     }
 
     public void setStreamImportant(int stream, boolean important) {
@@ -475,11 +484,7 @@ public class VolumeDialogImpl implements VolumeDialog,
         }
         animateViewOut(mSettingsButton, false, width, z);
 
-
-        if  (mShowingMediaPlayer){
-            mShowingMediaPlayer = false;
-            mDialogView.removeView(mMediaPlayerLayout);
-        }
+        mMediaPlayer.setVisibility(GONE);
 
         if (mShowingMediaDevices) {
             mDialogRowsView.setAlpha(1f);
@@ -645,10 +650,7 @@ public class VolumeDialogImpl implements VolumeDialog,
                         }
                     }
 
-                    if  (mMediaPlayer.isPlaying()){
-                        mShowingMediaPlayer = true;
-                        mDialogView.addView(mMediaPlayerLayout);
-                    }
+                    mMediaPlayer.setVisibility(VISIBLE);
 
                     animateViewIn(mSettingsButton, false, 0, z);
 
@@ -1690,6 +1692,7 @@ public class VolumeDialogImpl implements VolumeDialog,
         public void onConfigurationChanged() {
             mDialog.dismiss();
             mConfigChanged = true;
+            mController.setMediaPlayerLayoutParams();
         }
 
         @Override
