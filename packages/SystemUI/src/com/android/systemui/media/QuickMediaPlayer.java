@@ -60,8 +60,8 @@ public class QuickMediaPlayer implements MediaListener {
     private MediaMetadata mMetadata;
     private int mForegroundColor;
     private final NotificationMediaManager mMediaManager;
-    protected LinearLayout mMediaNotifView;
-    protected ComponentName mRecvComponent;
+    private LinearLayout mMediaNotifView;
+    private ComponentName mRecvComponent;
     private Callback mSessionCallback = new Callback() {
         @Override
         public void onSessionDestroyed() {
