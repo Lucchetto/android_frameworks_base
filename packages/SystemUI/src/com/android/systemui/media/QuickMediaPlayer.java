@@ -1,5 +1,7 @@
 package com.android.systemui.media;
 
+import android.app.Notification;
+import android.app.Notification.Builder;
 import android.app.PendingIntent;
 import android.app.PendingIntent.CanceledException;
 import android.content.ComponentName;
@@ -51,7 +53,6 @@ public class QuickMediaPlayer implements MediaListener {
     private static final int[] NOTIF_ACTION_IDS = { com.android.internal.R.id.action0,
             com.android.internal.R.id.action1, com.android.internal.R.id.action2, com.android.internal.R.id.action3,
             com.android.internal.R.id.action4 };
-    private final int[] mActionIds;
     private int mBackgroundColor;
     private final BackgroundExecutor mBackgroundExecutor;
     private Context mContext;
@@ -72,13 +73,13 @@ public class QuickMediaPlayer implements MediaListener {
     private int mWidth;
     private int mHeight;
     private boolean mIsPlaybackActive;
+    private Notification mNotification;
 
     public QuickMediaPlayer(Context context, ViewGroup viewGroup) {
         mContext = context;
         mMediaNotifView = (LinearLayout) LayoutInflater.from(context).inflate(R.layout.qqs_media_panel, viewGroup,
                 false);
         mMediaManager = Dependency.get(NotificationMediaManager.class);
-        mActionIds = QQS_ACTION_IDS;
         mBackgroundExecutor = BackgroundExecutor.get();
     }
 
@@ -86,11 +87,11 @@ public class QuickMediaPlayer implements MediaListener {
         return mMediaNotifView;
     }
 
-    public void setMediaSession(Token token, Icon icon, int i, int i2, View view, int[] iArr,
-            final PendingIntent pendingIntent, String appName) {
+    public void setMediaSession(Token token, int i, int i2, View view, final Notification notification) {
         mToken = token;
         mForegroundColor = i;
         mBackgroundColor = i2;
+        mNotification = notification;
         String packageName = mController != null ? mController.getPackageName() : "";
         MediaController newMediaController = new MediaController(mContext, token);
         boolean z = mToken.equals(token) && packageName.equals(newMediaController.getPackageName());
@@ -116,6 +117,7 @@ public class QuickMediaPlayer implements MediaListener {
             updateArtwork();
             mIsPlaybackActive = true;
 
+            final PendingIntent pendingIntent = mNotification.contentIntent;
             if (pendingIntent != null) {
                 mMediaNotifView.setOnClickListener(new OnClickListener() {
                     @Override
@@ -130,14 +132,14 @@ public class QuickMediaPlayer implements MediaListener {
                 });
             }
             ImageView imageView2 = (ImageView) mMediaNotifView.findViewById(R.id.icon);
-            Drawable loadDrawable = icon.loadDrawable(mContext);
+            Drawable loadDrawable = mNotification.getSmallIcon().loadDrawable(mContext);
             loadDrawable.setTint(mForegroundColor);
             imageView2.setImageDrawable(loadDrawable);
             TextView textView = (TextView) mMediaNotifView.findViewById(R.id.media_artist);
             textView.setText(mMetadata.getString("android.media.metadata.ARTIST"));
             textView.setTextColor(mForegroundColor);
             TextView textView2 = (TextView) mMediaNotifView.findViewById(R.id.app_name);
-            textView2.setText(appName);
+            textView2.setText(Builder.recoverBuilder(mContext, mNotification).loadHeaderAppName());
             textView2.setTextColor(mForegroundColor);
             TextView textView3 = (TextView) mMediaNotifView.findViewById(R.id.media_title);
             textView3.setText(mMetadata.getString("android.media.metadata.TITLE"));
@@ -147,14 +149,15 @@ public class QuickMediaPlayer implements MediaListener {
             mMediaManager.addCallback(this);
 
             int i3 = 0;
+            final int[] actions = mNotification.extras.getIntArray("android.compactActions");
             LinearLayout linearLayout = (LinearLayout) view;
-            if (iArr != null) {
-                int min = Math.min(Math.min(iArr.length, linearLayout.getChildCount()), QQS_ACTION_IDS.length);
+            if (actions != null) {
+                int min = Math.min(Math.min(actions.length, linearLayout.getChildCount()), QQS_ACTION_IDS.length);
                 int i4 = 0;
                 while (i4 < min) {
                     final ImageButton imageButton = (ImageButton) mMediaNotifView.findViewById(QQS_ACTION_IDS[i4]);
                     final ImageButton imageButton2 = (ImageButton) linearLayout
-                            .findViewById(NOTIF_ACTION_IDS[iArr[i4]]);
+                            .findViewById(NOTIF_ACTION_IDS[actions[i4]]);
                     if (imageButton2 == null || imageButton2.getDrawable() == null
                             || imageButton2.getVisibility() != View.VISIBLE) {
                         imageButton.setVisibility(View.GONE);
@@ -274,14 +277,14 @@ public class QuickMediaPlayer implements MediaListener {
     public void clearControls() {
         int i = 0;
         while (true) {
-            if (i < mActionIds.length) {
-                ImageButton imageButton = (ImageButton) mMediaNotifView.findViewById(mActionIds[i]);
+            if (i < QQS_ACTION_IDS.length) {
+                ImageButton imageButton = (ImageButton) mMediaNotifView.findViewById(QQS_ACTION_IDS[i]);
                 if (imageButton != null) {
                     imageButton.setVisibility(View.GONE);
                 }
                 i++;
             } else {
-                ImageButton imageButton2 = (ImageButton) mMediaNotifView.findViewById(mActionIds[0]);
+                ImageButton imageButton2 = (ImageButton) mMediaNotifView.findViewById(QQS_ACTION_IDS[0]);
                 imageButton2.setOnClickListener(new OnClickListener() {
                     @Override
                     public final void onClick(View view) {

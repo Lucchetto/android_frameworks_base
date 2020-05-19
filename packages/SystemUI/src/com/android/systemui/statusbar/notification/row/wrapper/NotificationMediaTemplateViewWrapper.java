@@ -184,13 +184,10 @@ public class NotificationMediaTemplateViewWrapper extends NotificationTemplateVi
         if (token != null) {
             StatusBarNotification sbn = mRow.getEntry().notification;
             Notification notification = sbn.getNotification();
-            String headerAppName = Builder.recoverBuilder(mContext, notification).loadHeaderAppName();
-            int[] intArray = notification.extras.getIntArray("android.compactActions");
             int originalIconColor = getNotificationHeader().getOriginalIconColor();
             final VolumeDialogControllerImpl mController = (VolumeDialogControllerImpl) Dependency.get(VolumeDialogController.class);
-            int i = originalIconColor;
-            mController.getMediaPlayer().setMediaSession(token, notification.getSmallIcon(), i, mBackgroundColor,
-                    mActions, intArray, notification.contentIntent, headerAppName);
+            mController.getMediaPlayer().setMediaSession(token, originalIconColor, mBackgroundColor,
+                    mActions, notification);
         }
 
         boolean showCompactSeekbar = mMediaManager.getShowCompactMediaSeekbar();
