@@ -74,6 +74,7 @@ public class QuickMediaPlayer implements MediaListener {
     private int mHeight;
     private boolean mIsPlaybackActive;
     private Notification mNotification;
+    private View mNotificationView;
 
     public QuickMediaPlayer(Context context, ViewGroup viewGroup) {
         mContext = context;
@@ -92,6 +93,7 @@ public class QuickMediaPlayer implements MediaListener {
         mForegroundColor = i;
         mBackgroundColor = i2;
         mNotification = notification;
+        mNotificationView = view;
         String packageName = mController != null ? mController.getPackageName() : "";
         MediaController newMediaController = new MediaController(mContext, token);
         boolean z = mToken.equals(token) && packageName.equals(newMediaController.getPackageName());
@@ -113,72 +115,74 @@ public class QuickMediaPlayer implements MediaListener {
                 Log.e(TAG, "Media metadata was null");
                 return;
             }
-
-            updateArtwork();
             mIsPlaybackActive = true;
+            updateMediaPlayerView();
+        }
+    }
 
-            final PendingIntent pendingIntent = mNotification.contentIntent;
-            if (pendingIntent != null) {
-                mMediaNotifView.setOnClickListener(new OnClickListener() {
-                    @Override
-                    public final void onClick(View view) {
-                        try {
-                            pendingIntent.send();
-                            mContext.sendBroadcast(new Intent("android.intent.action.CLOSE_SYSTEM_DIALOGS"));
-                        } catch (CanceledException e) {
-                            Log.e(TAG, "Pending intent was canceled", e);
-                        }
-                    }
-                });
-            }
-            ImageView imageView2 = (ImageView) mMediaNotifView.findViewById(R.id.icon);
-            Drawable loadDrawable = mNotification.getSmallIcon().loadDrawable(mContext);
-            loadDrawable.setTint(mForegroundColor);
-            imageView2.setImageDrawable(loadDrawable);
-            TextView textView = (TextView) mMediaNotifView.findViewById(R.id.media_artist);
-            textView.setText(mMetadata.getString("android.media.metadata.ARTIST"));
-            textView.setTextColor(mForegroundColor);
-            TextView textView2 = (TextView) mMediaNotifView.findViewById(R.id.app_name);
-            textView2.setText(Builder.recoverBuilder(mContext, mNotification).loadHeaderAppName());
-            textView2.setTextColor(mForegroundColor);
-            TextView textView3 = (TextView) mMediaNotifView.findViewById(R.id.media_title);
-            textView3.setText(mMetadata.getString("android.media.metadata.TITLE"));
-            textView3.setTextColor(mForegroundColor);
-            textView3.setSelected(true);
-            mMediaManager.removeCallback(this);
-            mMediaManager.addCallback(this);
+    private void updateMediaPlayerView() {
+        updateArtwork();
 
-            int i3 = 0;
-            final int[] actions = mNotification.extras.getIntArray("android.compactActions");
-            LinearLayout linearLayout = (LinearLayout) view;
-            if (actions != null) {
-                int min = Math.min(Math.min(actions.length, linearLayout.getChildCount()), QQS_ACTION_IDS.length);
-                int i4 = 0;
-                while (i4 < min) {
-                    final ImageButton imageButton = (ImageButton) mMediaNotifView.findViewById(QQS_ACTION_IDS[i4]);
-                    final ImageButton imageButton2 = (ImageButton) linearLayout
-                            .findViewById(NOTIF_ACTION_IDS[actions[i4]]);
-                    if (imageButton2 == null || imageButton2.getDrawable() == null
-                            || imageButton2.getVisibility() != View.VISIBLE) {
-                        imageButton.setVisibility(View.GONE);
-                    } else {
-                        imageButton.setImageDrawable(imageButton2.getDrawable().mutate());
-                        imageButton.setVisibility(View.VISIBLE);
-                        imageButton.setOnClickListener(new OnClickListener() {
-                            @Override
-                            public final void onClick(View view) {
-                                imageButton2.performClick();
-                            }
-                        });
+        final PendingIntent pendingIntent = mNotification.contentIntent;
+        if (pendingIntent != null) {
+            mMediaNotifView.setOnClickListener(new OnClickListener() {
+                @Override
+                public final void onClick(View view) {
+                    try {
+                        pendingIntent.send();
+                        mContext.sendBroadcast(new Intent("android.intent.action.CLOSE_SYSTEM_DIALOGS"));
+                    } catch (CanceledException e) {
+                        Log.e(TAG, "Pending intent was canceled", e);
                     }
-                    i4++;
                 }
-                i3 = i4;
+            });
+        }
+        ImageView imageView2 = (ImageView) mMediaNotifView.findViewById(R.id.icon);
+        Drawable loadDrawable = mNotification.getSmallIcon().loadDrawable(mContext);
+        loadDrawable.setTint(mForegroundColor);
+        imageView2.setImageDrawable(loadDrawable);
+        TextView textView = (TextView) mMediaNotifView.findViewById(R.id.media_artist);
+        textView.setText(mMetadata.getString("android.media.metadata.ARTIST"));
+        textView.setTextColor(mForegroundColor);
+        TextView textView2 = (TextView) mMediaNotifView.findViewById(R.id.app_name);
+        textView2.setText(Builder.recoverBuilder(mContext, mNotification).loadHeaderAppName());
+        textView2.setTextColor(mForegroundColor);
+        TextView textView3 = (TextView) mMediaNotifView.findViewById(R.id.media_title);
+        textView3.setText(mMetadata.getString("android.media.metadata.TITLE"));
+        textView3.setTextColor(mForegroundColor);
+        textView3.setSelected(true);
+        mMediaManager.removeCallback(this);
+        mMediaManager.addCallback(this);
+
+        int i3 = 0;
+        final int[] actions = mNotification.extras.getIntArray("android.compactActions");
+        LinearLayout linearLayout = (LinearLayout) mNotificationView;
+        if (actions != null) {
+            int min = Math.min(Math.min(actions.length, linearLayout.getChildCount()), QQS_ACTION_IDS.length);
+            int i4 = 0;
+            while (i4 < min) {
+                final ImageButton imageButton = (ImageButton) mMediaNotifView.findViewById(QQS_ACTION_IDS[i4]);
+                final ImageButton imageButton2 = (ImageButton) linearLayout.findViewById(NOTIF_ACTION_IDS[actions[i4]]);
+                if (imageButton2 == null || imageButton2.getDrawable() == null
+                        || imageButton2.getVisibility() != View.VISIBLE) {
+                    imageButton.setVisibility(View.GONE);
+                } else {
+                    imageButton.setImageDrawable(imageButton2.getDrawable().mutate());
+                    imageButton.setVisibility(View.VISIBLE);
+                    imageButton.setOnClickListener(new OnClickListener() {
+                        @Override
+                        public final void onClick(View view) {
+                            imageButton2.performClick();
+                        }
+                    });
+                }
+                i4++;
             }
-            while (i3 < QQS_ACTION_IDS.length) {
-                ((ImageButton) mMediaNotifView.findViewById(QQS_ACTION_IDS[i3])).setVisibility(View.GONE);
-                i3++;
-            }
+            i3 = i4;
+        }
+        while (i3 < QQS_ACTION_IDS.length) {
+            ((ImageButton) mMediaNotifView.findViewById(QQS_ACTION_IDS[i3])).setVisibility(View.GONE);
+            i3++;
         }
     }
 
