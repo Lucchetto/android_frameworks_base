@@ -63,6 +63,7 @@ public class QuickMediaPlayer implements MediaListener {
     protected LinearLayout mMediaNotifView;
     protected ComponentName mRecvComponent;
     private Callback mSessionCallback = new Callback() {
+        @Override
         public void onSessionDestroyed() {
             Log.d("QuickMediaPlayer", "session destroyed");
             mController.unregisterCallback(mSessionCallback);
