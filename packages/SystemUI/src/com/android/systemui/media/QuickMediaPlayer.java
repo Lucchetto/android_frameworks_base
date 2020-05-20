@@ -77,12 +77,16 @@ public class QuickMediaPlayer implements MediaListener {
     private Notification mNotification;
     private View mNotificationView;
 
-    public QuickMediaPlayer(Context context, ViewGroup viewGroup) {
+    public QuickMediaPlayer(Context context) {
         mContext = context;
-        mMediaNotifView = (LinearLayout) LayoutInflater.from(context).inflate(R.layout.qqs_media_panel, viewGroup,
-                false);
         mMediaManager = Dependency.get(NotificationMediaManager.class);
         mBackgroundExecutor = BackgroundExecutor.get();
+    }
+
+    public void inflateLayout(Context context, ViewGroup viewGroup) {
+        mMediaNotifView = (LinearLayout) LayoutInflater.from(context).inflate(R.layout.qqs_media_panel, viewGroup,
+        false);
+        updateMediaPlayerView();
     }
 
     public View getView() {
@@ -117,11 +121,17 @@ public class QuickMediaPlayer implements MediaListener {
                 return;
             }
             mIsPlaybackActive = true;
-            updateMediaPlayerView();
+
+            if (mMediaNotifView != null) {
+                updateMediaPlayerView();
+            }
         }
     }
 
     private void updateMediaPlayerView() {
+        if (!isPlaybackActive()) {
+            return;
+        }
         updateArtwork();
 
         final PendingIntent pendingIntent = mNotification.contentIntent;
@@ -188,9 +198,6 @@ public class QuickMediaPlayer implements MediaListener {
     }
 
     private void updateArtwork() {
-        if (mMetadata == null) {
-            return;
-        }
         mBackgroundExecutor.submit(new Runnable() {
             @Override
             public final void run() {
@@ -223,7 +230,6 @@ public class QuickMediaPlayer implements MediaListener {
         if (w != mWidth || h != mHeight) {
             mWidth = w;
             mHeight = h;
-            updateArtwork();
         }
     }
 

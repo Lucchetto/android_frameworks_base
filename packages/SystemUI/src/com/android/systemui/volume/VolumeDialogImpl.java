@@ -84,7 +84,6 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.DecelerateInterpolator;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.SeekBar;
@@ -196,7 +195,7 @@ public class VolumeDialogImpl implements VolumeDialog,
 
     private View mMediaPlayerView;
     private QuickMediaPlayer mMediaPlayer;
-    private FrameLayout mMediaPlayerLayout;
+    private ViewGroup mMediaPlayerContainer;
 
     private final List<MediaOutputRow> mMediaOutputRows = new ArrayList<>();
     private final List<MediaDevice> mMediaDevices = new ArrayList<>();
@@ -328,11 +327,13 @@ public class VolumeDialogImpl implements VolumeDialog,
         mRinger = mDialog.findViewById(R.id.ringer);
 
         if (!isLandscape()) {
-            mMediaPlayerLayout = mController.getMediaPlayerLayout();
+            mMediaPlayerContainer = mDialog.findViewById(R.id.player_container);
+            ViewGroup.LayoutParams lp1 = mMediaPlayerContainer.getLayoutParams();
+            mMediaPlayer.setArtworkSize(lp1.width, lp1.height);
+            mMediaPlayer.inflateLayout(mContext, mMediaPlayerContainer);
             mMediaPlayerView = mMediaPlayer.getView();
             mMediaPlayerView.setVisibility(GONE);
-            mMediaPlayerLayout.addView(mMediaPlayerView);
-            mDialogView.addView(mMediaPlayerLayout);
+            mMediaPlayerContainer.addView(mMediaPlayerView);
         }
 
         LayoutTransition lt = new LayoutTransition();
@@ -488,7 +489,9 @@ public class VolumeDialogImpl implements VolumeDialog,
         }
         animateViewOut(mSettingsButton, false, width, z);
 
-        mMediaPlayerView.setVisibility(GONE);
+        if (mMediaPlayer.isPlaybackActive()) {
+            mMediaPlayerView.setVisibility(GONE);
+        }
 
         if (mShowingMediaDevices) {
             mDialogRowsView.setAlpha(1f);
@@ -1698,7 +1701,6 @@ public class VolumeDialogImpl implements VolumeDialog,
         public void onConfigurationChanged() {
             mDialog.dismiss();
             mConfigChanged = true;
-            mController.setMediaPlayerLayoutParams();
         }
 
         @Override
