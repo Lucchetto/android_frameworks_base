@@ -328,6 +328,7 @@ public class VolumeDialogImpl implements VolumeDialog,
 
         if (!isLandscape()) {
             mMediaPlayerContainer = mDialog.findViewById(R.id.player_container);
+            mMediaPlayerContainer.setVisibility(VISIBLE);
             ViewGroup.LayoutParams lp1 = mMediaPlayerContainer.getLayoutParams();
             mMediaPlayer.setArtworkSize(lp1.width, lp1.height);
             mMediaPlayer.inflateLayout(mContext, mMediaPlayerContainer);
