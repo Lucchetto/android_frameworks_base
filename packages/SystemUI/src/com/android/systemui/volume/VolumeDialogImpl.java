@@ -274,7 +274,11 @@ public class VolumeDialogImpl implements VolumeDialog,
         mWindow.setWindowAnimations(com.android.internal.R.style.Animation_Toast);
         WindowManager.LayoutParams lp = mWindow.getAttributes();
         lp.width = MATCH_PARENT;
-        lp.height = WRAP_CONTENT;
+        if (isLandscape()) {
+            lp.height = MATCH_PARENT;
+        } else {
+            lp.height = WRAP_CONTENT;
+        }
         lp.format = PixelFormat.TRANSLUCENT;
         lp.setTitle(VolumeDialogImpl.class.getSimpleName());
         lp.windowAnimations = -1;
