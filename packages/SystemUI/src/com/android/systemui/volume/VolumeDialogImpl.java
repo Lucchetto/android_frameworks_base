@@ -27,6 +27,7 @@ import static android.media.AudioManager.STREAM_RING;
 import static android.media.AudioManager.STREAM_VOICE_CALL;
 import static android.view.View.ACCESSIBILITY_LIVE_REGION_POLITE;
 import static android.view.View.GONE;
+import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
@@ -490,7 +491,8 @@ public class VolumeDialogImpl implements VolumeDialog,
         animateViewOut(mSettingsButton, false, width, z);
 
         if (mMediaPlayer.isPlaybackActive()) {
-            mMediaPlayerView.setVisibility(GONE);
+            animateViewOut(mMediaPlayerView, false, mMediaPlayerView.getWidth(),
+                    mMediaPlayerView.getElevation());
         }
 
         if (mShowingMediaDevices) {
@@ -659,6 +661,8 @@ public class VolumeDialogImpl implements VolumeDialog,
 
                     if (mMediaPlayer.isPlaybackActive()) {
                         mMediaPlayerView.setVisibility(VISIBLE);
+                        animateViewIn(mMediaPlayerView, true, mMediaPlayerView.getWidth(),
+                                mMediaPlayerView.getElevation());
                     }
 
                     animateViewIn(mSettingsButton, false, 0, z);
