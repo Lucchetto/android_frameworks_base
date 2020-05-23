@@ -187,6 +187,7 @@ public class VolumeDialogImpl implements VolumeDialog,
     private boolean mLeftVolumeRocker;
 
     private boolean mVibrateOnSlider;
+    private boolean mDarkMode;
 
     private boolean mExpanded;
     private boolean mShowingMediaDevices;
@@ -217,6 +218,8 @@ public class VolumeDialogImpl implements VolumeDialog,
         mElevation = mContext.getResources().getDimension(R.dimen.volume_dialog_elevation);
         mSpacer = mContext.getResources().getDimension(R.dimen.volume_dialog_row_spacer);
 
+        setDarkMode();
+
         mHandler.postDelayed(() -> {
             if (mLocalMediaManager == null) {
                 mLocalMediaManager = new LocalMediaManager(mContext, TAG, null);
@@ -231,6 +234,22 @@ public class VolumeDialogImpl implements VolumeDialog,
     public void onUiModeChanged() {
         mContext.getTheme().applyStyle(mContext.getThemeResId(), true);
         removeAllMediaOutputRows();
+        setDarkMode();
+    }
+
+    private void setDarkMode() {
+        final int nightModeFlags = mContext.getResources().getConfiguration().uiMode &
+                Configuration.UI_MODE_NIGHT_MASK;
+
+        switch (nightModeFlags) {
+            case Configuration.UI_MODE_NIGHT_YES:
+                mDarkMode = true;
+                break;
+            case Configuration.UI_MODE_NIGHT_NO:
+            case Configuration.UI_MODE_NIGHT_UNDEFINED:
+                mDarkMode = false;
+                break;
+        }
     }
 
     public void init(int windowType, Callback callback) {
@@ -1544,6 +1563,10 @@ public class VolumeDialogImpl implements VolumeDialog,
                 ? Utils.getColorAccent(mContext)
                 : Utils.getColorAttr(mContext, android.R.attr.colorControlNormal)
                 .withAlpha(getAlphaAttr(android.R.attr.disabledAlpha));
+        final ColorStateList iconTint = mDarkMode && !useActiveColoring ?
+                Utils.getColorAttr(mContext, android.R.attr.textColorPrimary)
+                : Utils.getColorAttr(mContext, android.R.attr.colorBackgroundFloating);
+        row.icon.setImageTintList(iconTint);
         row.slider.setProgressTintList(tint);
         row.slider.setProgressBackgroundTintList(backgroundTint);
         row.cachedTint = tint;
