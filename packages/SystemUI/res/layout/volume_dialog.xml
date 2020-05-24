@@ -35,13 +35,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/volume_dialog_spacer"
-        android:gravity="bottom">
+        android:gravity="bottom"
+        android:clipChildren="false"
+        android:clipToPadding="false">
 
         <FrameLayout
             android:id="@+id/ringer"
             android:layout_width="@dimen/volume_dialog_panel_width"
             android:layout_height="@dimen/volume_dialog_panel_width"
-            android:layout_marginEnd="@dimen/volume_dialog_panel_row_padding"
             android:background="@drawable/rounded_volume_background"
             android:elevation="@dimen/volume_dialog_elevation">
 
@@ -54,18 +55,29 @@
         </FrameLayout>
 
         <LinearLayout
+            android:id="@+id/odi_captions"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:clipChildren="false"
+            android:clipToPadding="false"
             android:gravity="start"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:paddingStart="@dimen/volume_dialog_panel_row_padding"
+            android:visibility="gone">
+
+            <ViewStub
+                android:id="@+id/odi_captions_tooltip_stub"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/volume_dialog_spacer"
+                android:inflatedId="@+id/odi_captions_tooltip_view"
+                android:layout="@layout/volume_tool_tip_view" />
 
             <FrameLayout
-                android:id="@+id/odi_captions"
                 android:layout_width="@dimen/volume_dialog_panel_width"
                 android:layout_height="@dimen/volume_dialog_panel_width"
                 android:background="@drawable/rounded_volume_background"
-                android:elevation="@dimen/volume_dialog_elevation"
-                android:visibility="gone">
+                android:elevation="@dimen/volume_dialog_elevation">
 
                 <com.android.systemui.volume.CaptionsToggleImageButton
                     android:id="@+id/odi_captions_icon"
@@ -75,14 +87,6 @@
                     android:src="@drawable/ic_volume_odi_captions_disabled"
                     sysui:optedOut="false" />
             </FrameLayout>
-
-            <ViewStub
-                android:id="@+id/odi_captions_tooltip_stub"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/volume_dialog_spacer"
-                android:inflatedId="@+id/odi_captions_tooltip_view"
-                android:layout="@layout/volume_tool_tip_view" />
         </LinearLayout>
     </LinearLayout>
 
