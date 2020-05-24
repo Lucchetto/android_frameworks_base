@@ -513,7 +513,7 @@ public class VolumeDialogImpl implements VolumeDialog,
         }
         animateViewOut(mSettingsButton, false, width, z);
 
-        if (mMediaPlayer.isPlaybackActive()) {
+        if (!isLandscape() && mMediaPlayer.isPlaybackActive()) {
             animateViewOut(mMediaPlayerView, false, mMediaPlayerView.getWidth(),
                     mMediaPlayerView.getElevation());
         }
@@ -682,7 +682,7 @@ public class VolumeDialogImpl implements VolumeDialog,
                         }
                     }
 
-                    if (mMediaPlayer.isPlaybackActive()) {
+                    if (!isLandscape() && mMediaPlayer.isPlaybackActive()) {
                         mMediaPlayerView.setVisibility(VISIBLE);
                         animateViewIn(mMediaPlayerView, true, mMediaPlayerView.getWidth(),
                                 mMediaPlayerView.getElevation());
