@@ -362,6 +362,7 @@ public class VolumeDialogImpl implements VolumeDialog,
         } else {
             mQuickMediaButton = mDialog.findViewById(R.id.quick_media_button);
             mQuickMediaIcon = mDialog.findViewById(R.id.quick_media_icon);
+            mMediaPlayer.createQuickMediaButton(mQuickMediaIcon);
         }
 
         LayoutTransition lt = new LayoutTransition();

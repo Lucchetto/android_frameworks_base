@@ -76,6 +76,7 @@ public class QuickMediaPlayer implements MediaListener {
     private boolean mIsPlaybackActive;
     private Notification mNotification;
     private View mNotificationView;
+    private ImageButton mQuickMediaButton;
 
     public QuickMediaPlayer(Context context) {
         mContext = context;
@@ -88,6 +89,11 @@ public class QuickMediaPlayer implements MediaListener {
         false);
         updateMediaPlayerView();
         return mMediaNotifView;
+    }
+
+    public void createQuickMediaButton(ImageButton button) {
+        mQuickMediaButton = button;
+        updateQuickMediaButton();
     }
 
     public void setMediaSession(Token token, int i, int i2, View view, final Notification notification) {
@@ -121,6 +127,32 @@ public class QuickMediaPlayer implements MediaListener {
 
             if (mMediaNotifView != null) {
                 updateMediaPlayerView();
+            }
+            if (mQuickMediaButton != null) {
+                updateQuickMediaButton();
+            }
+        }
+    }
+
+    private void updateQuickMediaButton() {
+        if (mController != null) {
+            MediaController.TransportControls controls = mController.getTransportControls();
+            if (isPlaying()) {
+                mQuickMediaButton.setImageDrawable(mContext.getResources().getDrawable(R.drawable.lb_ic_pause));
+                mQuickMediaButton.setOnClickListener(new OnClickListener() {
+                    @Override
+                    public final void onClick(View view) {
+                        controls.pause();
+                    }
+                });
+            } else {
+                mQuickMediaButton.setImageDrawable(mContext.getResources().getDrawable(R.drawable.lb_ic_play));
+                mQuickMediaButton.setOnClickListener(new OnClickListener() {
+                    @Override
+                    public final void onClick(View view) {
+                        controls.play();
+                    }
+                });
             }
         }
     }
