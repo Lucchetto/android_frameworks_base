@@ -145,12 +145,14 @@ public class VolumeDialogImpl implements VolumeDialog,
     private ViewGroup mDialogView;
     private ViewGroup mDialogRowsView;
     private ViewGroup mRinger;
+    private ViewGroup mQuickMediaButton;
     private ViewGroup mMediaOutputView;
     private ViewGroup mMediaOutputScrollView;
     private TextView mMediaTitleText;
     private ImageButton mMediaButton;
     private ImageButton mSettingsButton;
     private ImageButton mRingerIcon;
+    private ImageButton mQuickMediaIcon;
     private ViewGroup mODICaptionsView;
     private CaptionsToggleImageButton mODICaptionsIcon;
     private ExpandableIndicator mExpandRows;
@@ -358,6 +360,9 @@ public class VolumeDialogImpl implements VolumeDialog,
             mMediaPlayerView = mMediaPlayer.getView();
             mMediaPlayerView.setVisibility(GONE);
             mMediaPlayerContainer.addView(mMediaPlayerView);
+        } else {
+            mQuickMediaButton = mDialog.findViewById(R.id.quick_media_button);
+            mQuickMediaIcon = mDialog.findViewById(R.id.quick_media_icon);
         }
 
         LayoutTransition lt = new LayoutTransition();
@@ -513,9 +518,13 @@ public class VolumeDialogImpl implements VolumeDialog,
         }
         animateViewOut(mSettingsButton, false, width, z);
 
-        if (!isLandscape() && mMediaPlayer.isPlaybackActive()) {
-            animateViewOut(mMediaPlayerView, false, mMediaPlayerView.getWidth(),
-                    mMediaPlayerView.getElevation());
+        if (mMediaPlayer.isPlaybackActive()) {
+            if (isLandscape()) {
+                animateViewOut(mQuickMediaButton, false, width, z);
+            } else {
+                animateViewOut(mMediaPlayerView, false, mMediaPlayerView.getWidth(),
+                        mMediaPlayerView.getElevation());
+            }
         }
 
         if (mShowingMediaDevices) {
@@ -682,10 +691,14 @@ public class VolumeDialogImpl implements VolumeDialog,
                         }
                     }
 
-                    if (!isLandscape() && mMediaPlayer.isPlaybackActive()) {
-                        mMediaPlayerView.setVisibility(VISIBLE);
-                        animateViewIn(mMediaPlayerView, true, mMediaPlayerView.getWidth(),
-                                mMediaPlayerView.getElevation());
+                    if (mMediaPlayer.isPlaybackActive()) {
+                        if (isLandscape()) {
+                            animateViewIn(mQuickMediaButton, false, width, z);
+                        } else {
+                            mMediaPlayerView.setVisibility(VISIBLE);
+                            animateViewIn(mMediaPlayerView, true, mMediaPlayerView.getWidth(),
+                                    mMediaPlayerView.getElevation());
+                        }
                     }
 
                     animateViewIn(mSettingsButton, false, 0, z);

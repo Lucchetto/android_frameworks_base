@@ -88,6 +88,23 @@
                     sysui:optedOut="false" />
             </FrameLayout>
         </LinearLayout>
+
+        <FrameLayout
+            android:id="@+id/quick_media_button"
+            android:layout_width="@dimen/volume_dialog_panel_width"
+            android:layout_height="@dimen/volume_dialog_panel_width"
+            android:layout_marginStart="@dimen/volume_dialog_panel_row_padding"
+            android:background="@drawable/rounded_volume_background"
+            android:elevation="@dimen/volume_dialog_elevation"
+            android:visibility="gone">
+
+            <com.android.keyguard.AlphaOptimizedImageButton
+                android:id="@+id/quick_media_icon"
+                style="@style/VolumeButtons"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="@dimen/volume_dialog_panel_ringer_icon_padding" />
+        </FrameLayout>
     </LinearLayout>
 
     <LinearLayout
