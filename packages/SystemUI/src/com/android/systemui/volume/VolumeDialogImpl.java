@@ -356,8 +356,7 @@ public class VolumeDialogImpl implements VolumeDialog,
             mMediaPlayerContainer.setVisibility(VISIBLE);
             ViewGroup.LayoutParams lp1 = mMediaPlayerContainer.getLayoutParams();
             mMediaPlayer.setArtworkSize(lp1.width, lp1.height);
-            mMediaPlayer.inflateLayout(mContext, mMediaPlayerContainer);
-            mMediaPlayerView = mMediaPlayer.getView();
+            mMediaPlayerView = mMediaPlayer.inflateLayout(mContext, mMediaPlayerContainer);
             mMediaPlayerView.setVisibility(GONE);
             mMediaPlayerContainer.addView(mMediaPlayerView);
         } else {
