@@ -37,7 +37,6 @@ import static com.android.systemui.volume.Events.DISMISS_REASON_SETTINGS_CLICKED
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
-import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
@@ -858,22 +857,19 @@ public class VolumeDialogImpl implements VolumeDialog,
             endZ = -endZ;
         }
 
-        view.setLayerType(View.LAYER_TYPE_HARDWARE, null);
-        PropertyValuesHolder xAnim = PropertyValuesHolder.ofFloat(View.TRANSLATION_X,
-                isAudioPanelOnLeftSide() ? -endX : endX);
-        PropertyValuesHolder zAnim = PropertyValuesHolder.ofFloat(View.TRANSLATION_Z, endZ);
-        PropertyValuesHolder alphaAnim = PropertyValuesHolder.ofFloat(View.ALPHA, endAlpha);
-        ObjectAnimator animator = ObjectAnimator.ofPropertyValuesHolder(view, xAnim, zAnim, alphaAnim);
-        animator.setDuration(DIALOG_SHOW_ANIMATION_DURATION);
-        animator.setInterpolator(new SystemUIInterpolators.LogDecelerateInterpolator());
-        animator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                view.setLayerType(View.LAYER_TYPE_NONE, null);
+        view.animate()
+            .alpha(endAlpha)
+            .translationX(isAudioPanelOnLeftSide() ? -endX : endX)
+            .translationZ(endZ)
+            .setDuration(DIALOG_SHOW_ANIMATION_DURATION)
+            .setInterpolator(new SystemUIInterpolators.LogDecelerateInterpolator())
+            .withEndAction(() -> {
                 Util.setVisOrGone(view, stayVisible);
-            }
-        });
-        animator.start();
+                view.setTranslationX(0);
+                view.setTranslationZ(0);
+                view.setAlpha(1);
+            })
+            .start();
     }
 
     ValueAnimator containerResizeAnimation(int start, int end) {
