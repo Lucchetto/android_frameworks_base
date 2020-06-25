@@ -36,7 +36,6 @@ import static com.android.systemui.volume.Events.DISMISS_REASON_SETTINGS_CLICKED
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.animation.LayoutTransition;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.annotation.SuppressLint;
@@ -364,11 +363,6 @@ public class VolumeDialogImpl implements VolumeDialog,
             mQuickMediaIcon = mDialog.findViewById(R.id.quick_media_icon);
             mMediaPlayer.createQuickMediaButton(mQuickMediaIcon);
         }
-
-        LayoutTransition lt = new LayoutTransition();
-        lt.disableTransitionType(LayoutTransition.DISAPPEARING);
-        lt.disableTransitionType(LayoutTransition.APPEARING);
-        mDialogRowsView.setLayoutTransition(lt);
 
         if (mRinger != null) {
             mRingerIcon = mRinger.findViewById(R.id.ringer_icon);
