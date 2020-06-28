@@ -521,6 +521,7 @@ public class VolumeDialogImpl implements VolumeDialog,
         final View mediaButton = mMediaButton;
         final View settingsButton = mSettingsButton;
 
+        mDialogRowsView.clearAnimation();
         ValueAnimator mAnimator = containerResizeAnimation(rowsContainerWidth, rowsContainerFinalWidth);
         mAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
@@ -711,6 +712,7 @@ public class VolumeDialogImpl implements VolumeDialog,
                     final View mediaButton = mMediaButton;
                     final View settingsButton = mSettingsButton;
 
+                    mDialogRowsView.clearAnimation();
                     ValueAnimator mAnimator = containerResizeAnimation(rowsContainerWidth, rowsContainerFinalWidth);
                     mAnimator.addListener(new AnimatorListenerAdapter() {
                         @Override
