@@ -38,6 +38,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
+import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.Dialog;
@@ -482,24 +483,20 @@ public class VolumeDialogImpl implements VolumeDialog,
                 R.dimen.volume_dialog_panel_width) + mSpacer;
         float z = mElevation;
 
-        boolean isMediaButtonVisible = mMediaButton.getVisibility() == VISIBLE;
+        int rowWidth = active.view.getWidth();
+        int rowsContainerWidth = mDialogRowsView.getWidth();
+        int rowsContainerFinalWidth = rowsContainerWidth;
 
-        if (isMediaButtonVisible && !mODIServiceComponentEnabled) {
-            animateViewOut(mMediaButton, false, width, z);
-        } else if (mODIServiceComponentEnabled) {
-            float widthMedia = width;
-            if (isMediaButtonVisible) {
-                animateViewOut(mMediaButton, false, widthMedia, z/2);
-                widthMedia += widthMedia;
-            }
-            animateViewOut(mODICaptionsView, false, widthMedia, z);
-            hideCaptionsTooltip();
+        if (mODIServiceComponentEnabled) {
+            animateViewOut(mODICaptionsView, false, width, z);
+
         }
 
         if (ring != null) {
             final boolean isRingVisible = active == ring;
             if (!isRingVisible) {
                 animateViewOut(ring.view, isRingVisible, width, z);
+                rowsContainerFinalWidth -= rowWidth;
                 z /= 2;
                 width = width * 2;
             }
@@ -508,9 +505,9 @@ public class VolumeDialogImpl implements VolumeDialog,
             final boolean isAlarmVisible = active == alarm;
             if (!isAlarmVisible) {
                 animateViewOut(alarm.view, isAlarmVisible, width, z);
+                rowsContainerFinalWidth -= rowWidth;
             }
         }
-        animateViewOut(mSettingsButton, false, width, z);
 
         if (mMediaPlayer.isPlaybackActive()) {
             if (isLandscape()) {
@@ -520,6 +517,23 @@ public class VolumeDialogImpl implements VolumeDialog,
                         mMediaPlayerView.getElevation());
             }
         }
+
+        final View mediaButton = mMediaButton;
+        final View settingsButton = mSettingsButton;
+
+        ValueAnimator mAnimator = containerResizeAnimation(rowsContainerWidth, rowsContainerFinalWidth);
+        mAnimator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                if (mediaButton.getVisibility() == VISIBLE) {
+                    mediaButton.setVisibility(GONE);
+                }
+                settingsButton.setVisibility(GONE);
+                ViewGroup.LayoutParams layoutParams = mDialogRowsView.getLayoutParams();
+                layoutParams.width = WRAP_CONTENT;
+            }
+        });
+        mAnimator.start();
 
         if (mShowingMediaDevices) {
             mDialogRowsView.setAlpha(1f);
@@ -652,18 +666,15 @@ public class VolumeDialogImpl implements VolumeDialog,
                             R.dimen.volume_dialog_panel_width) + mSpacer;
                     float z = mElevation;
 
+                    int rowWidth = active.view.getWidth();
+                    int rowsContainerWidth = mDialogRowsView.getWidth();
+                    int rowsContainerFinalWidth = rowsContainerWidth;
+
                     boolean showMediaOutput = !Utils.isAudioModeOngoingCall(mContext) &&
                             mMediaOutputView.getChildCount() > 0;
 
-                    if (showMediaOutput && !mODIServiceComponentEnabled) {
-                        animateViewIn(mMediaButton, false, width, z);
-                    } else if (mODIServiceComponentEnabled) {
-                        float widthMedia = width;
-                        if (showMediaOutput) {
-                            animateViewIn(mMediaButton, false, widthMedia, z / 2);
-                            widthMedia += widthMedia;
-                        }
-                        animateViewIn(mODICaptionsView, false, widthMedia, z);
+                    if (mODIServiceComponentEnabled) {
+                        animateViewIn(mODICaptionsView, false, width, z);
                         if (mPendingOdiCaptionsTooltip && mODICaptionsView != null) {
                             showCaptionsTooltip();
                             mPendingOdiCaptionsTooltip = false;
@@ -674,6 +685,7 @@ public class VolumeDialogImpl implements VolumeDialog,
                         final boolean isRingVisible = active == ring;
                         if (!isRingVisible) {
                             animateViewIn(ring.view, isRingVisible, width, z);
+                            rowsContainerFinalWidth += rowWidth;
                             z /= 2;
                             width = width * 2;
                         }
@@ -682,6 +694,7 @@ public class VolumeDialogImpl implements VolumeDialog,
                         final boolean isAlarmVisible = active == alarm;
                         if (!isAlarmVisible) {
                             animateViewIn(alarm.view, isAlarmVisible, width, z);
+                            rowsContainerFinalWidth += rowWidth;
                         }
                     }
 
@@ -695,7 +708,25 @@ public class VolumeDialogImpl implements VolumeDialog,
                         }
                     }
 
-                    animateViewIn(mSettingsButton, false, 0, z);
+                    final View mediaButton = mMediaButton;
+                    final View settingsButton = mSettingsButton;
+
+                    ValueAnimator mAnimator = containerResizeAnimation(rowsContainerWidth, rowsContainerFinalWidth);
+                    mAnimator.addListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationStart(Animator animation) {
+                            if (showMediaOutput) {
+                                mediaButton.setVisibility(VISIBLE);
+                            }
+                            settingsButton.setVisibility(VISIBLE);
+                        }
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            ViewGroup.LayoutParams layoutParams = mDialogRowsView.getLayoutParams();
+                            layoutParams.width = WRAP_CONTENT;
+                        }
+                    });
+                    mAnimator.start();
 
                     provideTouchHapticH(VibrationEffect.get(VibrationEffect.EFFECT_TICK));
                     mExpanded = true;
@@ -841,6 +872,22 @@ public class VolumeDialogImpl implements VolumeDialog,
             }
         });
         animator.start();
+    }
+
+    ValueAnimator containerResizeAnimation(int start, int end) {
+        ValueAnimator animator = ValueAnimator.ofInt(start, end);
+        animator.setDuration(DIALOG_SHOW_ANIMATION_DURATION);
+        animator.setInterpolator(new SystemUIInterpolators.LogDecelerateInterpolator());
+        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                int value = (Integer) valueAnimator.getAnimatedValue();
+                ViewGroup.LayoutParams layoutParams = mDialogRowsView.getLayoutParams();
+                layoutParams.width = value;
+                mDialogRowsView.setLayoutParams(layoutParams);
+            }
+        });
+        return animator;
     }
 
     @Override

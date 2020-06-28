@@ -125,7 +125,7 @@
                 android:id="@+id/volume_dialog_rows"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="center"
+                android:gravity="start"
                 android:minWidth="@dimen/volume_dialog_panel_width"
                 android:orientation="horizontal">
                 <!-- volume rows added and removed here! :-) -->
@@ -195,7 +195,6 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:animateLayoutChanges="true"
             android:gravity="start">
 
             <com.android.systemui.statusbar.phone.ExpandableIndicator
