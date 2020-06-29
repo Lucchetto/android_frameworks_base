@@ -474,9 +474,9 @@ public class VolumeDialogImpl implements VolumeDialog,
 
     private void cleanExpandedRows() {
 
+        VolumeRow active = getActiveRow();
         VolumeRow ring = findRow(STREAM_RING);
         VolumeRow alarm = findRow(STREAM_ALARM);
-        VolumeRow active = getActiveRow();
 
         float width = mContext.getResources().getDimension(
                 R.dimen.volume_dialog_panel_width) + mSpacer;
@@ -488,24 +488,25 @@ public class VolumeDialogImpl implements VolumeDialog,
 
         if (mODIServiceComponentEnabled) {
             animateViewOut(mODICaptionsView, false, width, z);
-
         }
 
-        if (ring != null) {
-            final boolean isRingVisible = active == ring;
-            if (!isRingVisible) {
-                animateViewOut(ring.view, isRingVisible, width, z);
-                rowsContainerFinalWidth -= rowWidth;
-                z /= 2;
-                width = width * 2;
+        int rowXTranslation = rowWidth;
+        for (int j = 0, visibileRows = 0; j < mDialogRowsView.getChildCount(); j++) {
+            View rowView = mDialogRowsView.getChildAt(j);
+            if (rowView.getVisibility() == GONE) {
+                continue;
             }
-        }
-        if (alarm != null) {
-            final boolean isAlarmVisible = active == alarm;
-            if (!isAlarmVisible) {
-                animateViewOut(alarm.view, isAlarmVisible, width, z);
-                rowsContainerFinalWidth -= rowWidth;
+            if (visibileRows > 0) {
+                if (rowView != active.view && (rowView == ring.view || rowView == alarm.view)) {
+                    animateViewOut(rowView, false, rowXTranslation, z);
+                    rowXTranslation += rowWidth;
+                    rowsContainerFinalWidth -= rowWidth;
+                    z /= 2;
+                } else {
+                    animateViewOut(rowView, true, rowXTranslation - rowWidth, z);
+                }
             }
+            visibileRows++;
         }
 
         if (mMediaPlayer.isPlaybackActive()) {
