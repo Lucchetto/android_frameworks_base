@@ -518,22 +518,8 @@ public class VolumeDialogImpl implements VolumeDialog,
             }
         }
 
-        final View mediaButton = mMediaButton;
-        final View settingsButton = mSettingsButton;
-
         mDialogRowsView.clearAnimation();
         ValueAnimator mAnimator = containerResizeAnimation(rowsContainerWidth, rowsContainerFinalWidth);
-        mAnimator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                if (mediaButton.getVisibility() == VISIBLE) {
-                    mediaButton.setVisibility(GONE);
-                }
-                settingsButton.setVisibility(GONE);
-                ViewGroup.LayoutParams layoutParams = mDialogRowsView.getLayoutParams();
-                layoutParams.width = WRAP_CONTENT;
-            }
-        });
         mAnimator.start();
 
         if (mShowingMediaDevices) {
@@ -709,25 +695,14 @@ public class VolumeDialogImpl implements VolumeDialog,
                         }
                     }
 
-                    final View mediaButton = mMediaButton;
-                    final View settingsButton = mSettingsButton;
-
                     mDialogRowsView.clearAnimation();
+                    mSettingsButton.setVisibility(VISIBLE);
+                    if (showMediaOutput) {
+                        mMediaButton.setVisibility(VISIBLE);
+                    } else {
+                        mMediaButton.setVisibility(GONE);
+                    }
                     ValueAnimator mAnimator = containerResizeAnimation(rowsContainerWidth, rowsContainerFinalWidth);
-                    mAnimator.addListener(new AnimatorListenerAdapter() {
-                        @Override
-                        public void onAnimationStart(Animator animation) {
-                            if (showMediaOutput) {
-                                mediaButton.setVisibility(VISIBLE);
-                            }
-                            settingsButton.setVisibility(VISIBLE);
-                        }
-                        @Override
-                        public void onAnimationEnd(Animator animation) {
-                            ViewGroup.LayoutParams layoutParams = mDialogRowsView.getLayoutParams();
-                            layoutParams.width = WRAP_CONTENT;
-                        }
-                    });
                     mAnimator.start();
 
                     provideTouchHapticH(VibrationEffect.get(VibrationEffect.EFFECT_TICK));
@@ -884,6 +859,13 @@ public class VolumeDialogImpl implements VolumeDialog,
                 ViewGroup.LayoutParams layoutParams = mDialogRowsView.getLayoutParams();
                 layoutParams.width = value;
                 mDialogRowsView.setLayoutParams(layoutParams);
+            }
+        });
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                ViewGroup.LayoutParams layoutParams = mDialogRowsView.getLayoutParams();
+                layoutParams.width = WRAP_CONTENT;
             }
         });
         return animator;
