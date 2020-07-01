@@ -513,8 +513,7 @@ public class VolumeDialogImpl implements VolumeDialog,
             if (isLandscape()) {
                 animateViewOut(mQuickMediaButton, false, width, z);
             } else {
-                animateViewOut(mMediaPlayerView, false, mMediaPlayerView.getWidth(),
-                        mMediaPlayerView.getElevation());
+                animateViewOut(mMediaPlayerView, false, mMediaPlayerContainer.getWidth(), 0);
             }
         }
 
@@ -689,9 +688,7 @@ public class VolumeDialogImpl implements VolumeDialog,
                         if (isLandscape()) {
                             animateViewIn(mQuickMediaButton, false, width, z);
                         } else {
-                            mMediaPlayerView.setVisibility(VISIBLE);
-                            animateViewIn(mMediaPlayerView, true, mMediaPlayerView.getWidth(),
-                                    mMediaPlayerView.getElevation());
+                            animateViewIn(mMediaPlayerView, false, mMediaPlayerContainer.getWidth(), 0);
                         }
                     }
 
