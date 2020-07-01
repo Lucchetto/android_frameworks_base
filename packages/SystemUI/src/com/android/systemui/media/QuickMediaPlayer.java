@@ -85,7 +85,7 @@ public class QuickMediaPlayer implements MediaListener {
     }
 
     public View inflateLayout(Context context, ViewGroup viewGroup) {
-        mMediaNotifView = (LinearLayout) LayoutInflater.from(context).inflate(R.layout.qqs_media_panel, viewGroup,
+        mMediaNotifView = (LinearLayout) LayoutInflater.from(context).inflate(R.layout.quick_media_player, viewGroup,
         false);
         updateMediaPlayerView();
         return mMediaNotifView;
