@@ -235,5 +235,6 @@
         android:layout_width="@dimen/volume_dialog_media_player_width"
         android:layout_height="@dimen/volume_dialog_media_player_height"
         android:layout_marginTop="@dimen/volume_dialog_spacer"
+        android:translationZ="15dp"
         android:visibility="gone" />
 </LinearLayout>
