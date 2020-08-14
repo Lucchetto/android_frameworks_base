@@ -40,6 +40,7 @@ import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
+import android.app.ActivityManager.RunningAppProcessInfo;
 import android.app.Dialog;
 import android.app.KeyguardManager;
 import android.content.ContentResolver;
@@ -98,6 +99,8 @@ import com.android.systemui.Dependency;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.plugins.VolumeDialog;
 import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.plugins.VolumeDialogController.State;
@@ -106,6 +109,7 @@ import com.android.systemui.statusbar.phone.ExpandableIndicator;
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
+import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.media.QuickMediaPlayer;
 import android.widget.FrameLayout;
 
@@ -121,7 +125,7 @@ import java.util.List;
  * Methods ending in "H" must be called on the (ui) handler.
  */
 public class VolumeDialogImpl implements VolumeDialog,
-        ConfigurationController.ConfigurationListener, LocalMediaManager.DeviceCallback {
+        ConfigurationController.ConfigurationListener, LocalMediaManager.DeviceCallback, StateListener {
     private static final String TAG = Util.logTag(VolumeDialogImpl.class);
 
     private static final long USER_ATTEMPT_GRACE_PERIOD = 1000;
@@ -199,6 +203,8 @@ public class VolumeDialogImpl implements VolumeDialog,
     private View mMediaPlayerView;
     private QuickMediaPlayer mMediaPlayer;
     private ViewGroup mMediaPlayerContainer;
+    private StatusBarStateController mStatusBarController;
+    private boolean mShouldShowPlayer;
 
     private final List<MediaOutputRow> mMediaOutputRows = new ArrayList<>();
     private final List<MediaDevice> mMediaDevices = new ArrayList<>();
@@ -260,6 +266,8 @@ public class VolumeDialogImpl implements VolumeDialog,
 
         mController.addCallback(mControllerCallbackH, mHandler);
         mController.getState();
+        mStatusBarController = Dependency.get(StatusBarStateController.class);
+        mStatusBarController.addCallback(this /* StateListener */);
 
         Dependency.get(ConfigurationController.class).addCallback(this);
     }
@@ -267,6 +275,7 @@ public class VolumeDialogImpl implements VolumeDialog,
     @Override
     public void destroy() {
         mController.removeCallback(mControllerCallbackH);
+        mStatusBarController.removeCallback(this /* StateListener */);
         mHandler.removeCallbacksAndMessages(null);
         Dependency.get(ConfigurationController.class).removeCallback(this);
         mLocalMediaManager.unregisterCallback(this);
@@ -316,6 +325,7 @@ public class VolumeDialogImpl implements VolumeDialog,
         mDialogView.setAlpha(0);
         mDialog.setCanceledOnTouchOutside(true);
         mDialog.setOnShowListener(dialog -> {
+            mShouldShowPlayer = shouldShowMediaPlayer();
             mDialogView.setTranslationX(
                     (mDialogView.getWidth() / 2.0f) * (!isAudioPanelOnLeftSide() ? 1 : -1));
             mDialogView.setAlpha(0);
@@ -472,6 +482,23 @@ public class VolumeDialogImpl implements VolumeDialog,
         }
     }
 
+    private boolean shouldShowMediaPlayer() {
+        return mMediaPlayer.isPlaybackActive()
+                && !(mStatusBarController.getState() == StatusBarState.KEYGUARD
+                || isAppVisible(mMediaPlayer.getPackageName()));
+    }
+
+    private boolean isAppVisible(String packageName) {
+        List<RunningAppProcessInfo> appProcesses = mActivityManager.getRunningAppProcesses();
+        for (RunningAppProcessInfo appProcess : appProcesses) {
+            if (appProcess.processName.equals(packageName)
+                    && appProcess.importance == RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void cleanExpandedRows() {
 
         VolumeRow active = getActiveRow();
@@ -509,13 +536,12 @@ public class VolumeDialogImpl implements VolumeDialog,
             visibileRows++;
         }
 
-        if (mMediaPlayer.isPlaybackActive()) {
-            if (isLandscape()) {
+            if (mQuickMediaButton != null && mQuickMediaButton.getVisibility() == VISIBLE) {
                 animateViewOut(mQuickMediaButton, false, width, z);
-            } else {
+            }
+            if (mMediaPlayerView != null && mMediaPlayerView.getVisibility() == VISIBLE) { 
                 animateViewOut(mMediaPlayerView, false, mMediaPlayerContainer.getWidth(), 0);
             }
-        }
 
         mDialogRowsView.clearAnimation();
         ValueAnimator mAnimator = containerResizeAnimation(rowsContainerWidth, rowsContainerFinalWidth);
@@ -684,7 +710,7 @@ public class VolumeDialogImpl implements VolumeDialog,
                         }
                     }
 
-                    if (mMediaPlayer.isPlaybackActive()) {
+                    if (mShouldShowPlayer) {
                         if (isLandscape()) {
                             animateViewIn(mQuickMediaButton, false, width, z);
                         } else {

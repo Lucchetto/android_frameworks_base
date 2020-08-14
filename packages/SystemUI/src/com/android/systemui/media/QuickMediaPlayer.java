@@ -77,6 +77,7 @@ public class QuickMediaPlayer implements MediaListener {
     private Notification mNotification;
     private View mNotificationView;
     private ImageButton mQuickMediaButton;
+    private String mPackageName;
 
     public QuickMediaPlayer(Context context) {
         mContext = context;
@@ -102,9 +103,9 @@ public class QuickMediaPlayer implements MediaListener {
         mBackgroundColor = i2;
         mNotification = notification;
         mNotificationView = view;
-        String packageName = mController != null ? mController.getPackageName() : "";
+        mPackageName = mController != null ? mController.getPackageName() : "";
         MediaController newMediaController = new MediaController(mContext, token);
-        boolean z = mToken.equals(token) && packageName.equals(newMediaController.getPackageName());
+        boolean z = mToken.equals(token) && mPackageName.equals(newMediaController.getPackageName());
         if (mController == null || z || isPlaying(newMediaController)) {
             mController = newMediaController;
             mMetadata = newMediaController.getMetadata();
@@ -297,6 +298,10 @@ public class QuickMediaPlayer implements MediaListener {
 
     public boolean isPlaying() {
         return isPlaying(mController);
+    }
+
+    public String getPackageName() {
+        return mPackageName;
     }
 
     protected boolean isPlaying(MediaController mediaController) {
