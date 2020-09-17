@@ -473,7 +473,11 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
             return;
         }
 
-        if (mState == ScrimState.UNLOCKED || mState == ScrimState.BUBBLE_EXPANDED) {
+        if (mState == ScrimState.UNLOCKED) {
+            mBehindAlpha = 0;
+            mInFrontAlpha = 0;
+        }
+        if (mState == ScrimState.BUBBLE_EXPANDED) {
             // Darken scrim as you pull down the shade when unlocked
             float behindFraction = getInterpolatedFraction();
             behindFraction = (float) Math.pow(behindFraction, 0.8f);
