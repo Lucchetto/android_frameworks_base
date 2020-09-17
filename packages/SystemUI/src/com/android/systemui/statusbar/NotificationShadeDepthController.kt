@@ -384,6 +384,7 @@ class NotificationShadeDepthController @Inject constructor(
         var newBlur = 0
         if (isOnKeyguardNotDismissing()) {
             newBlur = blurUtils.blurRadiusOfRatio(shadeExpansion)
+            notificationShadeWindowController.updateQSBlurScrim(shadeExpansion)
         }
         shadeSpring.animateTo(newBlur)
     }

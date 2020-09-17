@@ -539,12 +539,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
     private int mWaterfallTopInset;
 
-    private SysuiColorExtractor.OnColorsChangedListener mOnColorsChangedListener =
-            (colorExtractor, which) -> {
-                final boolean useDarkText = mColorExtractor.getNeutralColors().supportsDarkText();
-                updateDecorViews(useDarkText);
-            };
-
     @Inject
     public NotificationStackScrollLayout(
             @Named(VIEW_CONTEXT) Context context,
@@ -673,7 +667,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         mStatusbarStateController = statusBarStateController;
         initializeForegroundServiceSection(fgsFeatureController);
         mUiEventLogger = uiEventLogger;
-        mColorExtractor.addOnColorsChangedListener(mOnColorsChangedListener);
         mKeyguardMediaController = keyguardMediaController;
         keyguardMediaController.setVisibilityChangedListener((visible) -> {
             if (visible) {
@@ -852,6 +845,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         mBgColor = mContext.getColor(R.color.notification_shade_background_color);
         updateBackgroundDimming();
         mShelf.onUiModeChanged();
+        updateDecorViews();
     }
 
     @ShadeViewRefactor(RefactorComponent.DECORATOR)
@@ -4878,18 +4872,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     /**
      * Update colors of "dismiss" and "empty shade" views.
      *
-     * @param lightTheme True if light theme should be used.
      */
     @ShadeViewRefactor(RefactorComponent.DECORATOR)
-    public void updateDecorViews(boolean lightTheme) {
-        if (lightTheme == mUsingLightTheme) {
-            return;
-        }
-        mUsingLightTheme = lightTheme;
-        Context context = new ContextThemeWrapper(mContext,
-                lightTheme ? R.style.Theme_SystemUI_Light : R.style.Theme_SystemUI);
+    public void updateDecorViews() {
         final @ColorInt int textColor =
-                Utils.getColorAttrDefaultColor(context, R.attr.wallpaperTextColor);
+                Utils.getColorAttrDefaultColor(mContext, android.R.attr.textColorPrimary);
         mSectionsManager.setHeaderForegroundColor(textColor);
         mFooterView.setTextColor(textColor);
         mEmptyShadeView.setTextColor(textColor);

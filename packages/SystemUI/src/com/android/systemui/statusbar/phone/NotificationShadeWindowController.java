@@ -100,6 +100,8 @@ public class NotificationShadeWindowController implements Callback, Dumpable,
 
     private final SysuiColorExtractor mColorExtractor;
 
+    private View mQSBlurScrim;
+
     @Inject
     public NotificationShadeWindowController(Context context, WindowManager windowManager,
             IActivityManager activityManager, DozeParameters dozeParameters,
@@ -204,6 +206,7 @@ public class NotificationShadeWindowController implements Callback, Dumpable,
 
         mWindowManager.addView(mNotificationShadeView, mLp);
         mLpChanged.copyFrom(mLp);
+        mQSBlurScrim = mNotificationShadeView.findViewById(R.id.qs_blur_scrim);
         onThemeChanged();
 
         // Make the state consistent with KeyguardViewMediator#setupLocked during initialization.
@@ -222,6 +225,12 @@ public class NotificationShadeWindowController implements Callback, Dumpable,
 
     public void setDozeScreenBrightness(int value) {
         mScreenBrightnessDoze = value / 255f;
+    }
+
+    public void updateQSBlurScrim(float expansion) {
+        if (mQSBlurScrim != null) {
+            mQSBlurScrim.setAlpha(expansion);
+        }
     }
 
     private void setKeyguardDark(boolean dark) {
@@ -625,6 +634,14 @@ public class NotificationShadeWindowController implements Callback, Dumpable,
         final boolean useDarkText = mColorExtractor.getNeutralColors().supportsDarkText();
         // Make sure we have the correct navbar/statusbar colors.
         setKeyguardDark(useDarkText);
+    }
+
+    @Override
+    public void onUiModeChanged() {
+        if (mQSBlurScrim == null) {
+            return;
+        }
+        mQSBlurScrim.setBackgroundColor(mContext.getColor(R.color.qs_blur_scrim));
     }
 
     /**
