@@ -95,7 +95,7 @@ public class QSDetail extends LinearLayout {
         // Update top space height in orientation change
         ViewGroup.MarginLayoutParams params = (MarginLayoutParams) getLayoutParams();
         params.topMargin = mContext.getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.quick_qs_offset_height);
+                com.android.internal.R.dimen.qs_status_bar_height);
         setLayoutParams(params);
     }
 

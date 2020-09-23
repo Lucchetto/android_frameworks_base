@@ -131,11 +131,10 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
                 (v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
             // Lazily update animators whenever the scrolling changes
             mQSAnimator.onQsScrollingChanged();
-            mHeader.setExpandedScrollAmount(scrollY);
         });
         mQSDetail = view.findViewById(R.id.qs_detail);
         mHeader = view.findViewById(R.id.header);
-        mQSPanel.setHeaderContainer(view.findViewById(R.id.header_text_container));
+        // mQSPanel.setHeaderContainer(view.findViewById(R.id.header_text_container));
         mFooter = view.findViewById(R.id.qs_footer);
         mContainer = view.findViewById(id.quick_settings_container);
 
