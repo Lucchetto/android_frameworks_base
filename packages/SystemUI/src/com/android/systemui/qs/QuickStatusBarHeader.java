@@ -68,6 +68,7 @@ import com.android.systemui.statusbar.phone.StatusBarIconController.TintedIconMa
 import com.android.systemui.statusbar.phone.StatusBarWindowView;
 import com.android.systemui.statusbar.phone.StatusIconContainer;
 import com.android.systemui.statusbar.policy.Clock;
+import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 import com.android.systemui.statusbar.policy.DateView;
 
 import java.util.ArrayList;
@@ -84,7 +85,7 @@ import javax.inject.Named;
  * contents.
  */
 public class QuickStatusBarHeader extends RelativeLayout implements
-        View.OnClickListener {
+        View.OnClickListener,ConfigurationListener {
     private static final String TAG = "QuickStatusBarHeader";
     private static final boolean DEBUG = false;
 
@@ -169,25 +170,18 @@ public class QuickStatusBarHeader extends RelativeLayout implements
 
         updateResources();
 
-        Rect tintArea = new Rect(0, 0, 0, 0);
-        int colorForeground = Utils.getColorAttrDefaultColor(getContext(),
-                android.R.attr.colorForeground);
-        float intensity = getColorIntensity(colorForeground);
-
-        // Set the correct tint for the status icons so they contrast
-        mIconManager.setTint(colorForeground);
-
         mClockView = findViewById(R.id.clock);
         mClockView.setOnClickListener(this);
         mDateView = findViewById(R.id.date);
 
-        // Tint for the battery icons are handled in setupHost()
         mBatteryRemainingIcon = findViewById(R.id.batteryRemainingIcon);
         // Don't need to worry about tuner settings for this icon
         mBatteryRemainingIcon.setIgnoreTunerUpdates(true);
         // QS will always show the estimate, and BatteryMeterView handles the case where
         // it's unavailable or charging
         mBatteryRemainingIcon.setPercentShowMode(BatteryMeterView.MODE_ESTIMATE);
+
+        updateExtendedStatusBarTint(getContext().getColor(R.color.qs_translucent_text_primary));
     }
 
     public QuickQSPanel getHeaderQsPanel() {
@@ -204,11 +198,16 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         return ignored;
     }
 
-    private void applyDarkness(int id, Rect tintArea, float intensity, int color) {
-        View v = findViewById(id);
-        if (v instanceof DarkReceiver) {
-            ((DarkReceiver) v).onDarkChanged(tintArea, intensity, color);
+    private void updateExtendedStatusBarTint(int tintColor) {
+        if (mIconManager != null) {
+            mIconManager.setTint(tintColor);
         }
+
+        // mCarrierGroup.setTint(tintColor);
+        mClockView.setTextColor(tintColor);
+        mDateView.setTextColor(tintColor);
+        mBatteryRemainingIcon.updateColors(tintColor, tintColor, tintColor);
+        mCarrierGroup.setTint(tintColor);
     }
 
     @Override
@@ -391,13 +390,6 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         //host.setHeaderView(mExpandIndicator);
         mHeaderQsPanel.setQSPanelAndHeader(mQsPanel, this);
         mHeaderQsPanel.setHost(host, null /* No customization in header */);
-
-
-        Rect tintArea = new Rect(0, 0, 0, 0);
-        int colorForeground = Utils.getColorAttrDefaultColor(getContext(),
-                android.R.attr.colorForeground);
-        float intensity = getColorIntensity(colorForeground);
-        mBatteryRemainingIcon.onDarkChanged(tintArea, intensity, colorForeground);
     }
 
     public void setCallback(Callback qsPanelCallback) {

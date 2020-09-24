@@ -55,4 +55,11 @@ public class QSCarrierGroup extends LinearLayout {
     View getCarrierDivider2() {
         return findViewById(R.id.qs_carrier_divider2);
     }
+
+    public void setTint(int tintColor) {
+        getNoSimTextView().setTextColor(tintColor);
+        getCarrier1View().setTint(tintColor);
+        getCarrier2View().setTint(tintColor);
+        getCarrier3View().setTint(tintColor);
+    }
 }
