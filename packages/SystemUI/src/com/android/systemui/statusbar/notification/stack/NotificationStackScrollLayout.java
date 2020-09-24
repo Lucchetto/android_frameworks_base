@@ -4876,7 +4876,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     @ShadeViewRefactor(RefactorComponent.DECORATOR)
     public void updateDecorViews() {
         final @ColorInt int textColor =
-                Utils.getColorAttrDefaultColor(mContext, android.R.attr.textColorPrimary);
+                mContext.getColor(R.color.qs_translucent_text_primary);
         mSectionsManager.setHeaderForegroundColor(textColor);
         mFooterView.setTextColor(textColor);
         mEmptyShadeView.setTextColor(textColor);
