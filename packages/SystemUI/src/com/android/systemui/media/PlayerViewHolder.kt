@@ -41,7 +41,7 @@ class PlayerViewHolder private constructor(itemView: View) {
     val artistText = itemView.requireViewById<TextView>(R.id.header_artist)
 
     // Output switcher
-    val seamless = itemView.requireViewById<ViewGroup>(R.id.media_seamless)
+    val seamless = itemView.findViewById<ViewGroup>(R.id.media_seamless)
     val seamlessIcon = itemView.requireViewById<ImageView>(R.id.media_seamless_image)
     val seamlessText = itemView.requireViewById<TextView>(R.id.media_seamless_text)
     val seamlessFallback = itemView.requireViewById<ImageView>(R.id.media_seamless_fallback)
@@ -58,17 +58,6 @@ class PlayerViewHolder private constructor(itemView: View) {
     val action2 = itemView.requireViewById<ImageButton>(R.id.action2)
     val action3 = itemView.requireViewById<ImageButton>(R.id.action3)
     val action4 = itemView.requireViewById<ImageButton>(R.id.action4)
-
-    init {
-        (player.background as IlluminationDrawable).let {
-            it.registerLightSource(seamless)
-            it.registerLightSource(action0)
-            it.registerLightSource(action1)
-            it.registerLightSource(action2)
-            it.registerLightSource(action3)
-            it.registerLightSource(action4)
-        }
-    }
 
     fun getAction(id: Int): ImageButton {
         return when (id) {
