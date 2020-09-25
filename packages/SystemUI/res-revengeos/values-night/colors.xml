@@ -17,4 +17,5 @@
 <resources>
     <color name="qs_blur_scrim">#af000000</color>
     <color name="qs_translucent_text_primary">#c5ffffff</color>
+    <color name="qs_translucent_text_secondary">#b3ffffff</color>
 </resources>
