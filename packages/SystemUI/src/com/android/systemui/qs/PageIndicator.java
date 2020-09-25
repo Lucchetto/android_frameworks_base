@@ -45,10 +45,7 @@ public class PageIndicator extends ViewGroup {
     }
 
     public void setNumPages(int numPages) {
-        TypedArray array = getContext().obtainStyledAttributes(
-                new int[]{android.R.attr.colorControlActivated});
-        int color = array.getColor(0, 0);
-        array.recycle();
+        int color = getContext().getColor(R.color.qs_translucent_primary);
         setNumPages(numPages, color);
     }
 
