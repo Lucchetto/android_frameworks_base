@@ -20,6 +20,6 @@
     <color name="config_fodColorBackground">#20000000</color>
 
     <color name="qs_blur_scrim">#c8ffffff</color>
-    <color name="qs_translucent_text_primary">#b3000000</color>
-    <color name="qs_translucent_text_secondary">#a6000000</color>
+    <color name="qs_translucent_text_primary">#c7000000</color>
+    <color name="qs_translucent_text_secondary">#80000000</color>
 </resources>
