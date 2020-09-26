@@ -97,7 +97,7 @@ public abstract class ExpandableOutlineView extends ExpandableView {
                     outline.setPath(clipPath);
                 }
             }
-            outline.setAlpha(mOutlineAlpha);
+            outline.setAlpha(0f);
         }
     };
 

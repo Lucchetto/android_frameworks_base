@@ -346,7 +346,7 @@
     <bool name="config_showNotificationGear">true</bool>
 
     <!-- Whether or not a background should be drawn behind a notification. -->
-    <bool name="config_drawNotificationBackground">true</bool>
+    <bool name="config_drawNotificationBackground">false</bool>
 
     <!-- Whether or the notifications can be shown and dismissed with a drag. -->
     <bool name="config_enableNotificationShadeDrag">true</bool>
@@ -404,7 +404,7 @@
     <bool name="config_hideDividersDuringExpand">false</bool>
 
     <!-- Whether or not child notifications that are part of a group will have shadows. -->
-    <bool name="config_enableShadowOnChildNotifications">true</bool>
+    <bool name="config_enableShadowOnChildNotifications">false</bool>
 
     <!-- Whether or not a view containing child notifications will have a custom background when
          it has been expanded to reveal its children. -->
