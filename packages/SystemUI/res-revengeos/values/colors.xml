@@ -23,4 +23,5 @@
     <color name="qs_translucent_text_primary">#c7000000</color>
     <color name="qs_translucent_text_secondary">#80000000</color>
     <color name="qs_translucent_primary">@color/qs_translucent_text_primary</color>
+    <color name="qs_translucent_disabled">#23000000</color>
 </resources>
