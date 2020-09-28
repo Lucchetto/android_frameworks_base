@@ -135,7 +135,6 @@ public class QSTileView extends QSTileBaseView {
         if (dualTarget != mLabelContainer.isClickable()) {
             mLabelContainer.setClickable(dualTarget);
             mLabelContainer.setLongClickable(dualTarget);
-            mLabelContainer.setBackground(dualTarget ? newTileBackground() : null);
         }
         mLabel.setEnabled(!state.disabledByPolicy);
         mPadLock.setVisibility(state.disabledByPolicy ? View.VISIBLE : View.GONE);
