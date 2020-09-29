@@ -169,7 +169,7 @@
 
     <color name="smart_reply_button_text">@color/GM2_grey_700</color>
     <color name="smart_reply_button_text_dark_bg">@*android:color/notification_primary_text_color_dark</color>
-    <color name="smart_reply_button_background">#ffffffff</color>
+    <color name="smart_reply_button_background">@android:color/transparent</color>
     <color name="smart_reply_button_stroke">#ffdadce0</color>
 
     <!-- Biometric dialog colors -->

@@ -861,7 +861,7 @@ public class SmartReplyView extends ViewGroup {
                 Drawable background = ((InsetDrawable) inset).getDrawable();
                 if (background instanceof GradientDrawable) {
                     GradientDrawable gradientDrawable = (GradientDrawable) background;
-                    gradientDrawable.setColor(backgroundColor);
+                    gradientDrawable.setColor(0);
                     gradientDrawable.setStroke(strokeWidth, strokeColor);
                 }
             }
