@@ -16,6 +16,7 @@
 
 package com.android.systemui.media
 
+import android.content.res.ColorStateList
 import android.text.format.DateUtils
 import androidx.annotation.UiThread
 import androidx.lifecycle.Observer
@@ -36,6 +37,16 @@ class SeekBarObserver(private val holder: PlayerViewHolder) : Observer<SeekBarVi
     /** Updates seek bar views when the data model changes. */
     @UiThread
     override fun onChanged(data: SeekBarViewModel.Progress) {
+        data.color?.let {
+            var tintList = ColorStateList.valueOf(it)
+            tintList = tintList.withAlpha(192) // 75%
+            holder.seekBar.setProgressTintList(tintList)
+            tintList = tintList.withAlpha(128) // 50%
+            holder.seekBar.setProgressBackgroundTintList(tintList)
+            holder.elapsedTimeView.setTextColor(it)
+            holder.totalTimeView.setTextColor(it)
+        }
+
         if (!data.enabled) {
             if (holder.seekBar.maxHeight != seekBarDisabledHeight) {
                 holder.seekBar.maxHeight = seekBarDisabledHeight

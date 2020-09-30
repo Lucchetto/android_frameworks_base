@@ -78,6 +78,7 @@ public class MediaControlPanel {
     private MediaViewController mMediaViewController;
     private MediaSession.Token mToken;
     private MediaController mController;
+    private int mForegroundColor;
     private int mBackgroundColor;
     private int mAlbumArtSize;
     private int mAlbumArtRadius;
@@ -184,6 +185,7 @@ public class MediaControlPanel {
             return;
         }
         MediaSession.Token token = data.getToken();
+        mForegroundColor = data.getForegroundColor();
         mBackgroundColor = data.getBackgroundColor();
         if (mToken == null || !mToken.equals(token)) {
             mToken = token;
@@ -220,24 +222,29 @@ public class MediaControlPanel {
 
         // App icon
         ImageView appIcon = mViewHolder.getAppIcon();
+        Drawable iconDrawable; 
         if (data.getAppIcon() != null) {
-            appIcon.setImageDrawable(data.getAppIcon());
+            iconDrawable = data.getAppIcon().mutate();
         } else {
-            Drawable iconDrawable = mContext.getDrawable(R.drawable.ic_music_note);
-            appIcon.setImageDrawable(iconDrawable);
+            iconDrawable = mContext.getDrawable(R.drawable.ic_music_note);
         }
+        iconDrawable.setTint(mForegroundColor);
+        appIcon.setImageDrawable(iconDrawable);
 
         // Song name
         TextView titleText = mViewHolder.getTitleText();
         titleText.setText(data.getSong());
+        titleText.setTextColor(mForegroundColor);
 
         // App title
         TextView appName = mViewHolder.getAppName();
         appName.setText(data.getApp());
+        appName.setTextColor(mForegroundColor);
 
         // Artist name
         TextView artistText = mViewHolder.getArtistText();
         artistText.setText(data.getArtist());
+        artistText.setTextColor(mForegroundColor);
 
         // Transfer chip
         mViewHolder.getSeamless().setVisibility(View.VISIBLE);
@@ -255,6 +262,8 @@ public class MediaControlPanel {
 
         ImageView iconView = mViewHolder.getSeamlessIcon();
         TextView deviceName = mViewHolder.getSeamlessText();
+
+        ColorStateList fgTintList = ColorStateList.valueOf(mForegroundColor);
 
         final MediaDeviceData device = data.getDevice();
         final int seamlessId = mViewHolder.getSeamless().getId();
@@ -286,7 +295,9 @@ public class MediaControlPanel {
             } else {
                 iconView.setImageDrawable(icon);
             }
+            iconView.setImageTintList(fgTintList);
             deviceName.setText(device.getName());
+            deviceName.setTextColor(fgTintList);
         } else {
             // Reset to default
             Log.w(TAG, "device is null. Not binding output chip.");
@@ -304,6 +315,7 @@ public class MediaControlPanel {
             MediaAction mediaAction = actionIcons.get(i);
             button.setImageDrawable(mediaAction.getDrawable());
             button.setContentDescription(mediaAction.getContentDescription());
+            button.setImageTintList(ColorStateList.valueOf(mForegroundColor));
             Runnable action = mediaAction.getAction();
 
             if (action == null) {
@@ -327,7 +339,8 @@ public class MediaControlPanel {
 
         // Seek Bar
         final MediaController controller = getController();
-        mBackgroundExecutor.execute(() -> mSeekBarViewModel.updateController(controller));
+        mBackgroundExecutor.execute(
+                () -> mSeekBarViewModel.updateController(controller, data.getForegroundColor()));
 
         // Set up long press menu
         // TODO: b/156036025 bring back media guts

@@ -89,27 +89,27 @@ public class SeekBarViewModelTest : SysuiTestCase() {
 
     @Test
     fun updateRegistersCallback() {
-        viewModel.updateController(mockController)
+        viewModel.updateController(mockController, Color.RED)
         verify(mockController).registerCallback(any())
     }
 
     @Test
     fun updateSecondTimeDoesNotRepeatRegistration() {
-        viewModel.updateController(mockController)
-        viewModel.updateController(mockController)
+        viewModel.updateController(mockController, Color.RED)
+        viewModel.updateController(mockController, Color.RED)
         verify(mockController, times(1)).registerCallback(any())
     }
 
     @Test
     fun updateDifferentControllerUnregistersCallback() {
-        viewModel.updateController(mockController)
+        viewModel.updateController(mockController, Color.RED)
         viewModel.updateController(mock(MediaController::class.java))
         verify(mockController).unregisterCallback(any())
     }
 
     @Test
     fun updateDifferentControllerRegistersCallback() {
-        viewModel.updateController(mockController)
+        viewModel.updateController(mockController, Color.RED)
         val controller2 = mock(MediaController::class.java)
         whenever(controller2.sessionToken).thenReturn(token2)
         viewModel.updateController(controller2)
@@ -118,9 +118,15 @@ public class SeekBarViewModelTest : SysuiTestCase() {
 
     @Test
     fun updateToNullUnregistersCallback() {
-        viewModel.updateController(mockController)
+        viewModel.updateController(mockController, Color.RED)
         viewModel.updateController(null)
         verify(mockController).unregisterCallback(any())
+    }
+
+    @Test
+    fun updateColor() {
+        viewModel.updateController(mockController, Color.RED)
+        assertThat(viewModel.progress.value!!.color).isEqualTo(Color.RED)
     }
 
     @Test
@@ -139,7 +145,7 @@ public class SeekBarViewModelTest : SysuiTestCase() {
         }
         whenever(mockController.getPlaybackState()).thenReturn(state)
         // WHEN the controller is updated
-        viewModel.updateController(mockController)
+        viewModel.updateController(mockController, Color.RED)
         // THEN the duration is extracted
         assertThat(viewModel.progress.value!!.duration).isEqualTo(duration)
         assertThat(viewModel.progress.value!!.enabled).isTrue()
@@ -155,7 +161,7 @@ public class SeekBarViewModelTest : SysuiTestCase() {
         }
         whenever(mockController.getMetadata()).thenReturn(metadata)
         // WHEN the controller is updated
-        viewModel.updateController(mockController)
+        viewModel.updateController(mockController, Color.RED)
         // THEN the duration is extracted
         assertThat(viewModel.progress.value!!.duration).isEqualTo(duration)
         assertThat(viewModel.progress.value!!.enabled).isFalse()
@@ -177,7 +183,7 @@ public class SeekBarViewModelTest : SysuiTestCase() {
         }
         whenever(mockController.getPlaybackState()).thenReturn(state)
         // WHEN the controller is updated
-        viewModel.updateController(mockController)
+        viewModel.updateController(mockController, Color.RED)
         // THEN the seek bar is disabled
         assertThat(viewModel.progress.value!!.enabled).isFalse()
     }
@@ -198,7 +204,7 @@ public class SeekBarViewModelTest : SysuiTestCase() {
         }
         whenever(mockController.getPlaybackState()).thenReturn(state)
         // WHEN the controller is updated
-        viewModel.updateController(mockController)
+        viewModel.updateController(mockController, Color.RED)
         // THEN the seek bar is disabled
         assertThat(viewModel.progress.value!!.enabled).isFalse()
     }
@@ -213,7 +219,7 @@ public class SeekBarViewModelTest : SysuiTestCase() {
         }
         whenever(mockController.getPlaybackState()).thenReturn(state)
         // WHEN the controller is updated
-        viewModel.updateController(mockController)
+        viewModel.updateController(mockController, Color.RED)
         // THEN elapsed time is captured
         assertThat(viewModel.progress.value!!.elapsedTime).isEqualTo(200.toInt())
     }
@@ -227,7 +233,7 @@ public class SeekBarViewModelTest : SysuiTestCase() {
         }
         whenever(mockController.getPlaybackState()).thenReturn(state)
         // WHEN the controller is updated
-        viewModel.updateController(mockController)
+        viewModel.updateController(mockController, Color.RED)
         // THEN seek is available
         assertThat(viewModel.progress.value!!.seekAvailable).isTrue()
     }
@@ -241,7 +247,7 @@ public class SeekBarViewModelTest : SysuiTestCase() {
         }
         whenever(mockController.getPlaybackState()).thenReturn(state)
         // WHEN the controller is updated
-        viewModel.updateController(mockController)
+        viewModel.updateController(mockController, Color.RED)
         // THEN seek is not available
         assertThat(viewModel.progress.value!!.seekAvailable).isFalse()
     }
@@ -249,7 +255,7 @@ public class SeekBarViewModelTest : SysuiTestCase() {
     @Test
     fun onSeek() {
         whenever(mockController.getTransportControls()).thenReturn(mockTransport)
-        viewModel.updateController(mockController)
+        viewModel.updateController(mockController, Color.RED)
         // WHEN user input is dispatched
         val pos = 42L
         viewModel.onSeek(pos)
@@ -261,7 +267,7 @@ public class SeekBarViewModelTest : SysuiTestCase() {
     @Test
     fun onSeekWithFalse() {
         whenever(mockController.getTransportControls()).thenReturn(mockTransport)
-        viewModel.updateController(mockController)
+        viewModel.updateController(mockController, Color.RED)
         // WHEN a false is received during the seek gesture
         val pos = 42L
         with(viewModel) {
@@ -327,7 +333,7 @@ public class SeekBarViewModelTest : SysuiTestCase() {
     @Test
     fun onProgressChangedNotFromUser() {
         whenever(mockController.getTransportControls()).thenReturn(mockTransport)
-        viewModel.updateController(mockController)
+        viewModel.updateController(mockController, Color.RED)
         // WHEN user starts dragging the seek bar
         val pos = 42
         viewModel.seekBarListener.onProgressChanged(SeekBar(context), pos, false)
@@ -339,7 +345,7 @@ public class SeekBarViewModelTest : SysuiTestCase() {
     @Test
     fun onStartTrackingTouch() {
         whenever(mockController.getTransportControls()).thenReturn(mockTransport)
-        viewModel.updateController(mockController)
+        viewModel.updateController(mockController, Color.RED)
         // WHEN user starts dragging the seek bar
         val pos = 42
         val bar = SeekBar(context).apply {
@@ -354,7 +360,7 @@ public class SeekBarViewModelTest : SysuiTestCase() {
     @Test
     fun onStopTrackingTouch() {
         whenever(mockController.getTransportControls()).thenReturn(mockTransport)
-        viewModel.updateController(mockController)
+        viewModel.updateController(mockController, Color.RED)
         // WHEN user ends drag
         val pos = 42
         val bar = SeekBar(context).apply {
@@ -369,7 +375,7 @@ public class SeekBarViewModelTest : SysuiTestCase() {
     @Test
     fun onStopTrackingTouchAfterProgress() {
         whenever(mockController.getTransportControls()).thenReturn(mockTransport)
-        viewModel.updateController(mockController)
+        viewModel.updateController(mockController, Color.RED)
         // WHEN user starts dragging the seek bar
         val pos = 42
         val progPos = 84
@@ -395,7 +401,7 @@ public class SeekBarViewModelTest : SysuiTestCase() {
         }
         whenever(mockController.getPlaybackState()).thenReturn(state)
         // WHEN the controller is updated
-        viewModel.updateController(mockController)
+        viewModel.updateController(mockController, Color.RED)
         // THEN a task is queued
         assertThat(fakeExecutor.numPending()).isEqualTo(1)
     }
@@ -409,7 +415,7 @@ public class SeekBarViewModelTest : SysuiTestCase() {
         }
         whenever(mockController.getPlaybackState()).thenReturn(state)
         // WHEN updated
-        viewModel.updateController(mockController)
+        viewModel.updateController(mockController, Color.RED)
         // THEN an update task is not queued
         assertThat(fakeExecutor.numPending()).isEqualTo(0)
     }
@@ -429,7 +435,7 @@ public class SeekBarViewModelTest : SysuiTestCase() {
         }
         whenever(mockController.getPlaybackState()).thenReturn(state)
         // WHEN updated
-        viewModel.updateController(mockController)
+        viewModel.updateController(mockController, Color.RED)
         // THEN an update task is queued
         assertThat(fakeExecutor.numPending()).isEqualTo(1)
     }
@@ -449,7 +455,7 @@ public class SeekBarViewModelTest : SysuiTestCase() {
         }
         whenever(mockController.getPlaybackState()).thenReturn(state)
         // WHEN updated
-        viewModel.updateController(mockController)
+        viewModel.updateController(mockController, Color.RED)
         // THEN an update task is not queued
         assertThat(fakeExecutor.numPending()).isEqualTo(0)
     }
@@ -462,7 +468,7 @@ public class SeekBarViewModelTest : SysuiTestCase() {
             build()
         }
         whenever(mockController.getPlaybackState()).thenReturn(state)
-        viewModel.updateController(mockController)
+        viewModel.updateController(mockController, Color.RED)
         // WHEN the next task runs
         with(fakeExecutor) {
             advanceClockToNext()
@@ -482,7 +488,7 @@ public class SeekBarViewModelTest : SysuiTestCase() {
             build()
         }
         whenever(mockController.getPlaybackState()).thenReturn(state)
-        viewModel.updateController(mockController)
+        viewModel.updateController(mockController, Color.RED)
         with(fakeExecutor) {
             advanceClockToNext()
             runAllReady()
@@ -508,7 +514,7 @@ public class SeekBarViewModelTest : SysuiTestCase() {
             build()
         }
         whenever(mockController.getPlaybackState()).thenReturn(state)
-        viewModel.updateController(mockController)
+        viewModel.updateController(mockController, Color.RED)
         with(fakeExecutor) {
             advanceClockToNext()
             runAllReady()
@@ -537,7 +543,7 @@ public class SeekBarViewModelTest : SysuiTestCase() {
             build()
         }
         whenever(mockController.getPlaybackState()).thenReturn(state)
-        viewModel.updateController(mockController)
+        viewModel.updateController(mockController, Color.RED)
         with(fakeExecutor) {
             advanceClockToNext()
             runAllReady()
@@ -570,7 +576,7 @@ public class SeekBarViewModelTest : SysuiTestCase() {
             build()
         }
         whenever(mockController.getPlaybackState()).thenReturn(state)
-        viewModel.updateController(mockController)
+        viewModel.updateController(mockController, Color.RED)
         // WHEN start listening
         viewModel.listening = true
         // THEN an update task is queued
@@ -579,7 +585,7 @@ public class SeekBarViewModelTest : SysuiTestCase() {
 
     @Test
     fun playbackChangeQueuesPollTask() {
-        viewModel.updateController(mockController)
+        viewModel.updateController(mockController, Color.RED)
         val captor = ArgumentCaptor.forClass(MediaController.Callback::class.java)
         verify(mockController).registerCallback(captor.capture())
         val callback = captor.value
@@ -612,7 +618,7 @@ public class SeekBarViewModelTest : SysuiTestCase() {
         }
         whenever(mockController.getPlaybackState()).thenReturn(state)
         // AND the controller has been updated
-        viewModel.updateController(mockController)
+        viewModel.updateController(mockController, Color.RED)
         // WHEN the controller is cleared on the event when the session is destroyed
         viewModel.clearController()
         with(fakeExecutor) {
@@ -625,7 +631,7 @@ public class SeekBarViewModelTest : SysuiTestCase() {
 
     @Test
     fun clearSeekBarUnregistersCallback() {
-        viewModel.updateController(mockController)
+        viewModel.updateController(mockController, Color.RED)
         viewModel.clearController()
         fakeExecutor.runAllReady()
         verify(mockController).unregisterCallback(any())
@@ -633,7 +639,7 @@ public class SeekBarViewModelTest : SysuiTestCase() {
 
     @Test
     fun destroyUnregistersCallback() {
-        viewModel.updateController(mockController)
+        viewModel.updateController(mockController, Color.RED)
         viewModel.onDestroy()
         fakeExecutor.runAllReady()
         verify(mockController).unregisterCallback(any())

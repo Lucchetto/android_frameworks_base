@@ -23,6 +23,7 @@ import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
@@ -38,6 +39,7 @@ import android.service.notification.StatusBarNotification
 import android.text.TextUtils
 import android.util.Log
 import com.android.internal.graphics.ColorUtils
+import com.android.internal.util.ContrastColorUtil
 import com.android.systemui.Dumpable
 import com.android.systemui.R
 import com.android.systemui.broadcast.BroadcastDispatcher
@@ -55,6 +57,8 @@ import java.util.concurrent.Executor
 import javax.inject.Inject
 import javax.inject.Singleton
 
+import androidx.palette.graphics.Palette
+
 // URI fields to try loading album art from
 private val ART_URIS = arrayOf(
         MediaMetadata.METADATA_KEY_ALBUM_ART_URI,
@@ -67,7 +71,7 @@ private const val DEFAULT_LUMINOSITY = 0.25f
 private const val LUMINOSITY_THRESHOLD = 0.05f
 private const val SATURATION_MULTIPLIER = 0.8f
 
-private val LOADING = MediaData(-1, false, 0, null, null, null, null, null,
+private val LOADING = MediaData(-1, false, 0, 0, null, null, null, null, null,
         emptyList(), emptyList(), "INVALID", null, null, null, true, null)
 
 fun isMediaNotification(sbn: StatusBarNotification): Boolean {
@@ -295,11 +299,19 @@ class MediaDataManager(
         } else {
             null
         }
-        val bgColor = artworkBitmap?.let { computeBackgroundColor(it) } ?: Color.DKGRAY
+        var bgColor = Color.DKGRAY
+        var fgColor = Color.WHITE
+        if (artworkBitmap != null) {
+            val p = MediaNotificationProcessor.generateArtworkPaletteBuilder(artworkBitmap)
+                    .generate()
+            val swatch = MediaNotificationProcessor.findBackgroundSwatch(p)
+            bgColor = swatch.rgb
+            fgColor = computeForegroundColor(p, bgColor)
+        }
 
         val mediaAction = getResumeMediaAction(resumeAction)
         foregroundExecutor.execute {
-            onMediaDataLoaded(packageName, null, MediaData(userId, true, bgColor, appName,
+            onMediaDataLoaded(packageName, null, MediaData(userId, true, fgColor, bgColor, appName,
                     null, desc.subtitle, desc.title, artworkIcon, listOf(mediaAction), listOf(0),
                     packageName, token, appIntent, device = null, active = false,
                     resumeAction = resumeAction, resumption = true, notificationKey = packageName,
@@ -353,7 +365,15 @@ class MediaDataManager(
                 }
             }
         }
-        val bgColor = computeBackgroundColor(artworkBitmap)
+        var bgColor = Color.DKGRAY
+        var fgColor = Color.WHITE
+        if (artworkBitmap != null) {
+            val p = MediaNotificationProcessor.generateArtworkPaletteBuilder(artworkBitmap)
+                    .generate()
+            val swatch = MediaNotificationProcessor.findBackgroundSwatch(p)
+            bgColor = swatch.rgb
+            fgColor = computeForegroundColor(p, bgColor)
+        }
 
         // App name
         val builder = Notification.Builder.recoverBuilder(context, notif)
@@ -415,7 +435,7 @@ class MediaDataManager(
             val resumeAction: Runnable? = mediaEntries[key]?.resumeAction
             val hasCheckedForResume = mediaEntries[key]?.hasCheckedForResume == true
             val active = mediaEntries[key]?.active ?: true
-            onMediaDataLoaded(key, oldKey, MediaData(sbn.normalizedUserId, true, bgColor, app,
+            onMediaDataLoaded(key, oldKey, MediaData(sbn.normalizedUserId, true, fgColor, bgColor, app,
                     smallIconDrawable, artist, song, artWorkIcon, actionIcons,
                     actionsToShowCollapsed, sbn.packageName, token, notif.contentIntent, null,
                     active, resumeAction = resumeAction, notificationKey = key,
@@ -468,16 +488,13 @@ class MediaDataManager(
         }
     }
 
-    private fun computeBackgroundColor(artworkBitmap: Bitmap?): Int {
-        var color = Color.DKGRAY
-        if (artworkBitmap != null) {
-            // If we have art, get colors from that
-            val p = MediaNotificationProcessor.generateArtworkPaletteBuilder(artworkBitmap)
-                    .generate()
-            val swatch = MediaNotificationProcessor.findBackgroundSwatch(p)
-            color = swatch.rgb
-        }
-        return color
+    private fun computeForegroundColor(p : Palette, bgColor : Int) : Int {
+        var fgColor = MediaNotificationProcessor.selectForegroundColor(bgColor, p)
+        // Make sure colors will be legible
+        val isDark = !ContrastColorUtil.isColorLight(bgColor)
+        fgColor = ContrastColorUtil.resolveContrastColor(context, fgColor, bgColor,
+                isDark)
+        return fgColor
     }
 
     private fun getResumeMediaAction(action: Runnable): MediaAction {

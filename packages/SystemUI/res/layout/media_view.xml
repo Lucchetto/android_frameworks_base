@@ -48,7 +48,6 @@
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
             android:fontFamily="@*android:string/config_bodyFontFamily"
-            android:textColor="@color/media_primary_text"
             android:gravity="start"
             android:textSize="14sp" />
 
@@ -58,7 +57,6 @@
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:fontFamily="@*android:string/config_bodyFontFamily"
-            android:textColor="@color/media_primary_text"
             android:gravity="end"
             android:textSize="14sp" />
     </FrameLayout>
@@ -132,7 +130,6 @@
             android:layout_height="@dimen/qs_seamless_icon_size"
             android:layout_marginEnd="8dp"
             android:layout_gravity="center_vertical"
-            android:tint="@color/media_primary_text"
             android:src="@*android:drawable/ic_media_seamless" />
 
         <TextView
@@ -143,7 +140,6 @@
             android:fontFamily="@*android:string/config_headlineFontFamily"
             android:singleLine="true"
             android:text="@*android:string/ext_media_seamless_action"
-            android:textColor="@color/media_primary_text"
             android:textDirection="locale"
             android:textSize="14sp" />
     </LinearLayout>
@@ -152,7 +148,6 @@
         android:id="@+id/media_seamless_fallback"
         android:layout_width="@dimen/qs_seamless_icon_size"
         android:layout_height="@dimen/qs_seamless_icon_size"
-        android:tint="@color/media_primary_text"
         android:src="@drawable/ic_cast_connected"
         android:forceHasOverlappingRendering="false" />
 
@@ -160,21 +155,18 @@
     <!-- As per Material Design on Biderectionality, this is forced to LTR in code -->
     <SeekBar
         android:id="@+id/media_progress_bar"
-        style="@android:style/Widget.ProgressBar.Horizontal"
+        style="@*android:style/Widget.DeviceDefault.SeekBar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:clickable="true"
         android:maxHeight="@dimen/qs_media_enabled_seekbar_height"
         android:paddingTop="8dp"
         android:paddingBottom="30dp"
-        android:progressTint="@color/media_seekbar_progress"
-        android:progressBackgroundTint="@color/media_disabled"
         android:splitTrack="false" />
 
     <!-- App name -->
     <TextView
         android:id="@+id/app_name"
-        android:textColor="@color/media_primary_text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:singleLine="true"
@@ -189,7 +181,6 @@
         android:layout_height="wrap_content"
         android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
         android:singleLine="true"
-        android:textColor="@color/media_primary_text"
         android:textSize="16sp" />
 
     <!-- Artist name -->
@@ -199,12 +190,10 @@
         android:layout_height="wrap_content"
         android:fontFamily="@*android:string/config_headlineFontFamily"
         android:singleLine="true"
-        android:textColor="@color/media_secondary_text"
         android:textSize="14sp" />
 
     <com.android.internal.widget.CachingIconView
         android:id="@+id/icon"
-        android:tint="@color/media_primary_text"
         android:layout_width="@dimen/qs_media_icon_size"
         android:layout_height="@dimen/qs_media_icon_size" />
 
