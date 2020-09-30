@@ -182,7 +182,7 @@ public class NotificationMediaTemplateViewWrapper extends NotificationTemplateVi
                 .getParcelable(Notification.EXTRA_MEDIA_SESSION);
 
         if (token != null) {
-            StatusBarNotification sbn = mRow.getEntry().notification;
+            StatusBarNotification sbn = mRow.getEntry().getSbn();
             Notification notification = sbn.getNotification();
             int originalIconColor = getNotificationHeader().getOriginalIconColor();
             final VolumeDialogControllerImpl mController = (VolumeDialogControllerImpl) Dependency.get(VolumeDialogController.class);

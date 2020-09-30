@@ -359,7 +359,7 @@ public class QuickMediaPlayer implements MediaListener {
     }
 
     @Override
-    public void onMetadataOrStateChanged(MediaMetadata mediaMetadata, @PlaybackState.State int state) {
+    public void onPrimaryMetadataOrStateChanged(MediaMetadata mediaMetadata, @PlaybackState.State int state) {
         if (state == PlaybackState.STATE_NONE) {
             clearControls();
             mMediaManager.removeCallback(this);
