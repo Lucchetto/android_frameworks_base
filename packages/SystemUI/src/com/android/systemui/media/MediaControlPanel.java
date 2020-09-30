@@ -304,6 +304,8 @@ public class MediaControlPanel {
             iconView.setVisibility(View.GONE);
             deviceName.setText(com.android.internal.R.string.ext_media_seamless_action);
         }
+        fgTintList = fgTintList.withAlpha(128);
+        mViewHolder.getSeamless().setForegroundTintList(fgTintList);
 
         List<Integer> actionsWhenCollapsed = data.getActionsToShowInCompact();
         // Media controls
