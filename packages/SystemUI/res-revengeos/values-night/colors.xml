@@ -20,4 +20,6 @@
     <color name="qs_translucent_text_secondary">#94ffffff</color>
     <color name="qs_translucent_primary">@color/qs_translucent_text_primary</color>
     <color name="qs_translucent_disabled">#35ffffff</color>
+
+    <color name="divider_stroke_color">#434343</color>
 </resources>
