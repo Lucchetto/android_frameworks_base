@@ -130,66 +130,6 @@
                 android:orientation="horizontal">
                 <!-- volume rows added and removed here! :-) -->
             </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/media_output_scroller"
-                android:layout_width="182dp"
-                android:layout_height="match_parent"
-                android:clickable="false"
-                android:clipChildren="false"
-                android:clipToPadding="false"
-                android:orientation="vertical"
-                android:visibility="gone">
-
-                <com.android.systemui.statusbar.AlphaOptimizedTextView
-                    android:id="@+id/media_output_title"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="end"
-                    android:clickable="false"
-                    android:ellipsize="marquee"
-                    android:focusable="true"
-                    android:marqueeRepeatLimit="marquee_forever"
-                    android:paddingBottom="5dp"
-                    android:paddingLeft="8dp"
-                    android:paddingRight="6dp"
-                    android:paddingTop="5dp"
-                    android:singleLine="true"
-                    android:text="@string/media_output_title"
-                    android:textColor="?android:attr/colorControlNormal"
-                    android:textSize="15sp"
-                    android:textStyle="bold" />
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="2dp"
-                    android:background="@color/divider_stroke_color" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="1"
-                    android:orientation="horizontal">
-
-                    <ScrollView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:fillViewport="true"
-                        android:scrollbars="none">
-
-                        <LinearLayout
-                            android:id="@+id/media_output_container"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:layout_gravity="top"
-                            android:gravity="top"
-                            android:layoutDirection="rtl"
-                            android:orientation="vertical">
-                            <!-- media output devices added and removed here -->
-                        </LinearLayout>
-                    </ScrollView>
-                </LinearLayout>
-            </LinearLayout>
         </FrameLayout>
 
         <LinearLayout
@@ -206,16 +146,6 @@
                 android:layout_marginBottom="0dp"
                 android:background="@drawable/volume_expand_indicator_bg"
                 android:rotation="90" />
-
-            <com.android.keyguard.AlphaOptimizedImageButton
-                android:id="@+id/media_button"
-                style="@style/VolumeButtons"
-                android:layout_width="@dimen/volume_dialog_panel_row_width"
-                android:layout_height="@dimen/volume_dialog_panel_row_width"
-                android:layout_margin="@dimen/volume_dialog_panel_row_padding"
-                android:layout_marginBottom="0dp"
-                android:src="@drawable/ic_speaker_bluetooth"
-                android:visibility="gone" />
 
             <com.android.keyguard.AlphaOptimizedImageButton
                 android:id="@+id/settings_button"
