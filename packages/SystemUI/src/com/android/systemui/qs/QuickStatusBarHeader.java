@@ -109,10 +109,12 @@ public class QuickStatusBarHeader extends RelativeLayout implements
     protected QuickQSPanel mHeaderQsPanel;
     protected QSTileHost mHost;
     private TintedIconManager mIconManager;
+    private TouchAnimator mHeaderTextContainerAlphaAnimator;
     private TouchAnimator mPrivacyChipAlphaAnimator;
     private final CommandQueue mCommandQueue;
 
     private LinearLayout mClockDateContainer, mStatusIconsContainer;
+    private View mHeaderTextContainerView;
     private View mSystemIconsView;
     private Clock mClockView;
     private DateView mDateView;
@@ -167,6 +169,9 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         mIconManager = new TintedIconManager(iconContainer, mCommandQueue);
 
         mCarrierGroup = findViewById(R.id.carrier_group);
+
+        // Views corresponding to the header info section (e.g. ringer and next alarm).
+        mHeaderTextContainerView = findViewById(R.id.header_text_container);
 
         updateResources();
 
@@ -243,6 +248,11 @@ public class QuickStatusBarHeader extends RelativeLayout implements
                 R.dimen.rounded_corner_content_padding);
         mStatusBarPaddingTop = resources.getDimensionPixelSize(R.dimen.status_bar_padding_top);
 
+        // Update height for a few views, especially due to landscape mode restricting space.
+        mHeaderTextContainerView.getLayoutParams().height =
+                resources.getDimensionPixelSize(R.dimen.qs_header_tooltip_height);
+        mHeaderTextContainerView.setLayoutParams(mHeaderTextContainerView.getLayoutParams());
+
         mSystemIconsView.getLayoutParams().height = resources.getDimensionPixelSize(
                 com.android.internal.R.dimen.qs_status_bar_height);
         mSystemIconsView.setLayoutParams(mSystemIconsView.getLayoutParams());
@@ -255,6 +265,13 @@ public class QuickStatusBarHeader extends RelativeLayout implements
             lp.height = WRAP_CONTENT;
         }
         setLayoutParams(lp);
+        updateHeaderTextContainerAlphaAnimator();
+    }
+
+    private void updateHeaderTextContainerAlphaAnimator() {
+        mHeaderTextContainerAlphaAnimator = new TouchAnimator.Builder()
+                .addFloat(mHeaderTextContainerView, "alpha", 0, 0, mExpandedHeaderAlpha)
+                .build();
     }
 
     public void setExpanded(boolean expanded) {
@@ -276,6 +293,23 @@ public class QuickStatusBarHeader extends RelativeLayout implements
                              float panelTranslationY) {
         final float keyguardExpansionFraction = forceExpanded ? 1f : expansionFraction;
 
+        if (forceExpanded) {
+            // If the keyguard is showing, we want to offset the text so that it comes in at the
+            // same time as the panel as it slides down.
+            mHeaderTextContainerView.setTranslationY(panelTranslationY);
+        } else {
+            mHeaderTextContainerView.setTranslationY(0f);
+        }
+
+        if (mHeaderTextContainerAlphaAnimator != null) {
+            mHeaderTextContainerAlphaAnimator.setPosition(keyguardExpansionFraction);
+            if (keyguardExpansionFraction > 0) {
+                mHeaderTextContainerView.setVisibility(VISIBLE);
+            } else {
+                mHeaderTextContainerView.setVisibility(INVISIBLE);
+            }
+        }
+
         if (expansionFraction < 1 && expansionFraction > 0.99) {
             if (mHeaderQsPanel.switchTileLayout()) {
                 updateResources();
@@ -289,6 +323,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         if (disabled == mQsDisabled) return;
         mQsDisabled = disabled;
         mHeaderQsPanel.setDisabledByPolicy(disabled);
+        mHeaderTextContainerView.setVisibility(mQsDisabled ? View.GONE : View.VISIBLE);
         updateResources();
     }
 
@@ -427,5 +462,23 @@ public class QuickStatusBarHeader extends RelativeLayout implements
             }
         }
         updateSystemIconsViewPadding();
+    }
+
+    public void setExpandedScrollAmount(int scrollY) {
+        // The scrolling of the expanded qs has changed. Since the header text isn't part of it,
+        // but would overlap content, we're fading it out.
+        float newAlpha = 1.0f;
+        if (mHeaderTextContainerView.getHeight() > 0) {
+            newAlpha = MathUtils.map(0, mHeaderTextContainerView.getHeight() / 2.0f, 1.0f, 0.0f,
+                    scrollY);
+            newAlpha = Interpolators.ALPHA_OUT.getInterpolation(newAlpha);
+        }
+        mHeaderTextContainerView.setScrollY(scrollY);
+        if (newAlpha != mExpandedHeaderAlpha) {
+            mExpandedHeaderAlpha = newAlpha;
+            mHeaderTextContainerView.setAlpha(MathUtils.lerp(0.0f, mExpandedHeaderAlpha,
+                    mKeyguardExpansionFraction));
+            updateHeaderTextContainerAlphaAnimator();
+        }
     }
 }
