@@ -33,4 +33,13 @@
     <item name="android:textSize">18sp</item>
     <item name="android:fontFamily">@*android:string/config_headlineFontFamilyMedium</item>
     </style>
+
+    <style name="QSActionButtons">
+        <item name="android:layout_width">@dimen/qs_header_action_button_size</item>
+        <item name="android:layout_height">@dimen/qs_header_action_button_size</item>
+        <item name="android:padding">@dimen/qs_header_icon_padding</item>
+        <item name="android:background">?android:attr/selectableItemBackgroundBorderless</item>
+        <item name="android:tint">@color/qs_translucent_primary</item>
+        <item name="android:scaleType">centerInside</item>
+    </style>
 </resources>

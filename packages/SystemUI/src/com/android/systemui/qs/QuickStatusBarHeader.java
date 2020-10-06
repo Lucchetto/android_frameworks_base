@@ -27,10 +27,14 @@ import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.RippleDrawable;
 import android.graphics.Color;
+import android.graphics.PorterDuff.Mode;
 import android.graphics.Rect;
 import android.media.AudioManager;
 import android.os.Handler;
+import android.os.UserManager;
 import android.provider.AlarmClock;
 import android.provider.Settings;
 import android.text.format.DateUtils;
@@ -53,6 +57,10 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto;
+import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.settingslib.drawable.UserIconDrawable;
 import com.android.settingslib.Utils;
 import com.android.systemui.BatteryMeterView;
 import com.android.systemui.Interpolators;
@@ -63,6 +71,8 @@ import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.qs.QSDetail.Callback;
 import com.android.systemui.qs.carrier.QSCarrierGroup;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.phone.MultiUserSwitch;
+import com.android.systemui.statusbar.phone.SettingsButton;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarIconController.TintedIconManager;
 import com.android.systemui.statusbar.phone.StatusBarWindowView;
@@ -70,6 +80,9 @@ import com.android.systemui.statusbar.phone.StatusIconContainer;
 import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 import com.android.systemui.statusbar.policy.DateView;
+import com.android.systemui.statusbar.policy.DeviceProvisionedController;
+import com.android.systemui.statusbar.policy.UserInfoController;
+import com.android.systemui.statusbar.policy.UserInfoController.OnUserInfoChangedListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -85,7 +98,7 @@ import javax.inject.Named;
  * contents.
  */
 public class QuickStatusBarHeader extends RelativeLayout implements
-        View.OnClickListener,ConfigurationListener {
+        View.OnClickListener,ConfigurationListener, OnUserInfoChangedListener {
     private static final String TAG = "QuickStatusBarHeader";
     private static final boolean DEBUG = false;
 
@@ -98,6 +111,8 @@ public class QuickStatusBarHeader extends RelativeLayout implements
     private final Handler mHandler = new Handler();
     private final StatusBarIconController mStatusBarIconController;
     private final ActivityStarter mActivityStarter;
+    private final DeviceProvisionedController mDeviceProvisionedController;
+    private final UserInfoController mUserInfoController;
 
     private QSPanel mQsPanel;
 
@@ -114,7 +129,13 @@ public class QuickStatusBarHeader extends RelativeLayout implements
     private final CommandQueue mCommandQueue;
 
     private LinearLayout mClockDateContainer, mStatusIconsContainer;
+
     private View mHeaderTextContainerView;
+    protected MultiUserSwitch mMultiUserSwitch;
+    private ImageView mMultiUserAvatar;
+    private View mEdit;
+    private SettingsButton mSettingsButton;
+
     private View mSystemIconsView;
     private Clock mClockView;
     private DateView mDateView;
@@ -135,11 +156,15 @@ public class QuickStatusBarHeader extends RelativeLayout implements
     public QuickStatusBarHeader(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
             StatusBarIconController statusBarIconController,
             ActivityStarter activityStarter,
-            CommandQueue commandQueue) {
+            CommandQueue commandQueue,
+            DeviceProvisionedController deviceProvisionedController,
+            UserInfoController userInfoController) {
         super(context, attrs);
         mStatusBarIconController = statusBarIconController;
         mActivityStarter = activityStarter;
         mCommandQueue = commandQueue;
+        mDeviceProvisionedController = deviceProvisionedController;
+        mUserInfoController = userInfoController;
     }
 
     @Override
@@ -172,6 +197,13 @@ public class QuickStatusBarHeader extends RelativeLayout implements
 
         // Views corresponding to the header info section (e.g. ringer and next alarm).
         mHeaderTextContainerView = findViewById(R.id.header_text_container);
+        mMultiUserSwitch = findViewById(R.id.multi_user_switch);
+        mMultiUserAvatar = mMultiUserSwitch.findViewById(R.id.multi_user_avatar);
+        mEdit = findViewById(android.R.id.edit);
+        mSettingsButton = findViewById(R.id.settings_button);
+        // RenderThread is doing more harm than good when touching the header (to expand quick
+        // settings), so disable it for this view
+        ((RippleDrawable) mSettingsButton.getBackground()).setForceSoftware(true);
 
         updateResources();
 
@@ -325,6 +357,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         mHeaderQsPanel.setDisabledByPolicy(disabled);
         mHeaderTextContainerView.setVisibility(mQsDisabled ? View.GONE : View.VISIBLE);
         updateResources();
+        updateEverything();
     }
 
     @Override
@@ -398,8 +431,10 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         }
         mListening = listening;
 
-        if (listening) {
+        if (mListening) {
+            mUserInfoController.addCallback(this);
         } else {
+            mUserInfoController.removeCallback(this);
         }
     }
 
@@ -412,11 +447,16 @@ public class QuickStatusBarHeader extends RelativeLayout implements
     }
 
     public void updateEverything() {
-        post(() -> setClickable(!mExpanded));
+        post(() -> {
+            updateVisibilities();
+            updateClickabilities();
+            setClickable(!mExpanded);
+        });
     }
 
     public void setQSPanel(final QSPanel qsPanel) {
         mQsPanel = qsPanel;
+        mMultiUserSwitch.setQsPanel(qsPanel);
         setupHost(qsPanel.getHost());
     }
 
@@ -425,6 +465,23 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         //host.setHeaderView(mExpandIndicator);
         mHeaderQsPanel.setQSPanelAndHeader(mQsPanel, this);
         mHeaderQsPanel.setHost(host, null /* No customization in header */);
+
+        mEdit.setOnClickListener(view ->
+        mActivityStarter.postQSRunnableDismissingKeyguard(() ->
+                mQsPanel.showEdit(view)));
+
+        mSettingsButton.setOnClickListener(view -> {
+            if (!mDeviceProvisionedController.isCurrentUserSetup()) {
+                // If user isn't setup just unlock the device and dump them back at SUW.
+                mActivityStarter.postQSRunnableDismissingKeyguard(() -> {
+                });
+                return;
+            }
+            MetricsLogger.action(mContext,
+                    mExpanded ? MetricsProto.MetricsEvent.ACTION_QS_EXPANDED_SETTINGS_LAUNCH
+                            : MetricsProto.MetricsEvent.ACTION_QS_COLLAPSED_SETTINGS_LAUNCH);
+            startSettingsActivity();
+        });
     }
 
     public void setCallback(Callback qsPanelCallback) {
@@ -480,5 +537,40 @@ public class QuickStatusBarHeader extends RelativeLayout implements
                     mKeyguardExpansionFraction));
             updateHeaderTextContainerAlphaAnimator();
         }
+    }
+
+    private void updateClickabilities() {
+        mMultiUserSwitch.setClickable(mMultiUserSwitch.getVisibility() == View.VISIBLE);
+        mEdit.setClickable(mEdit.getVisibility() == View.VISIBLE);
+        mSettingsButton.setClickable(mSettingsButton.getVisibility() == View.VISIBLE);
+    }
+
+    private void updateVisibilities() {
+        final boolean isDemo = UserManager.isDeviceInDemoMode(mContext);
+        mEdit.setVisibility(isDemo || !mExpanded ? View.INVISIBLE : View.VISIBLE);
+        mSettingsButton.setVisibility(isDemo || !mExpanded ? View.INVISIBLE : View.VISIBLE);
+        mMultiUserSwitch.setVisibility(showUserSwitcher() ? View.VISIBLE : View.INVISIBLE);
+    }
+
+    private void startSettingsActivity() {
+        mActivityStarter.startActivity(new Intent(android.provider.Settings.ACTION_SETTINGS),
+                true /* dismissShade */);
+    }
+
+    private boolean showUserSwitcher() {
+        return mExpanded && mMultiUserSwitch.isMultiUserEnabled();
+    }
+
+    @Override
+    public void onUserInfoChanged(String name, Drawable picture, String userAccount) {
+        if (picture != null &&
+                UserManager.get(mContext).isGuestUser(KeyguardUpdateMonitor.getCurrentUser()) &&
+                !(picture instanceof UserIconDrawable)) {
+            picture = picture.getConstantState().newDrawable(mContext.getResources()).mutate();
+            picture.setColorFilter(
+                    Utils.getColorAttrDefaultColor(mContext, android.R.attr.colorForeground),
+                    Mode.SRC_IN);
+        }
+        mMultiUserAvatar.setImageDrawable(picture);
     }
 }
