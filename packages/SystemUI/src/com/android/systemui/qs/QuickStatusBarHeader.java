@@ -130,16 +130,26 @@ public class QuickStatusBarHeader extends RelativeLayout implements
 
     private LinearLayout mClockDateContainer, mStatusIconsContainer;
 
-    private View mHeaderTextContainerView;
+    View.OnClickListener mEditClickListener;
+    View.OnClickListener mSettingsClickListener;
+
+    private ViewGroup mHeaderTextContainerView;
+    private ViewGroup mQuickActionButtons;
     protected MultiUserSwitch mMultiUserSwitch;
     private ImageView mMultiUserAvatar;
     private View mEdit;
     private SettingsButton mSettingsButton;
 
-    private View mSystemIconsView;
+    private ViewGroup mSystemIconsView;
     private Clock mClockView;
     private DateView mDateView;
     private BatteryMeterView mBatteryRemainingIcon;
+
+    private ViewGroup mQuickActionButtonsLand;
+    protected MultiUserSwitch mMultiUserSwitchLand;
+    private ImageView mMultiUserAvatarLand;
+    private View mEditLand;
+    private SettingsButton mSettingsButtonLand;
 
     private boolean mHasTopCutout = false;
     private int mStatusBarPaddingTop = 0;
@@ -197,13 +207,23 @@ public class QuickStatusBarHeader extends RelativeLayout implements
 
         // Views corresponding to the header info section (e.g. ringer and next alarm).
         mHeaderTextContainerView = findViewById(R.id.header_text_container);
-        mMultiUserSwitch = findViewById(R.id.multi_user_switch);
+        mQuickActionButtons = mHeaderTextContainerView.findViewById(R.id.qs_header_action_buttons);
+        mMultiUserSwitch = mQuickActionButtons.findViewById(R.id.multi_user_switch);
         mMultiUserAvatar = mMultiUserSwitch.findViewById(R.id.multi_user_avatar);
-        mEdit = findViewById(android.R.id.edit);
-        mSettingsButton = findViewById(R.id.settings_button);
+        mEdit = mQuickActionButtons.findViewById(android.R.id.edit);
+        mSettingsButton = mQuickActionButtons.findViewById(R.id.settings_button);
         // RenderThread is doing more harm than good when touching the header (to expand quick
         // settings), so disable it for this view
         ((RippleDrawable) mSettingsButton.getBackground()).setForceSoftware(true);
+
+        mQuickActionButtonsLand = mSystemIconsView.findViewById(R.id.quick_status_bar_action_buttons_land);
+        mMultiUserSwitchLand = mQuickActionButtonsLand.findViewById(R.id.multi_user_switch);
+        mMultiUserAvatarLand = mMultiUserSwitchLand.findViewById(R.id.multi_user_avatar);
+        mEditLand = mQuickActionButtonsLand.findViewById(android.R.id.edit);
+        mSettingsButtonLand = mQuickActionButtonsLand.findViewById(R.id.settings_button);
+        // RenderThread is doing more harm than good when touching the header (to expand quick
+        // settings), so disable it for this view
+        ((RippleDrawable) mSettingsButtonLand.getBackground()).setForceSoftware(true);
 
         updateResources();
 
@@ -251,6 +271,9 @@ public class QuickStatusBarHeader extends RelativeLayout implements
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         updateResources();
+        boolean isLandscape = newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE;
+        mQuickActionButtonsLand.setVisibility(isLandscape ? View.VISIBLE : View.GONE);
+        mQuickActionButtons.setVisibility(isLandscape ? View.GONE : View.VISIBLE);
     }
 
     @Override
@@ -356,8 +379,10 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         mQsDisabled = disabled;
         mHeaderQsPanel.setDisabledByPolicy(disabled);
         mHeaderTextContainerView.setVisibility(mQsDisabled ? View.GONE : View.VISIBLE);
+        mQuickActionButtonsLand.setVisibility(mQsDisabled ? View.GONE : View.VISIBLE);
         updateResources();
         updateEverything();
+        updateActionButtonsDisable();
     }
 
     @Override
@@ -448,8 +473,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
 
     public void updateEverything() {
         post(() -> {
-            updateVisibilities();
-            updateClickabilities();
+            updateHeaderTextContainer();
             setClickable(!mExpanded);
         });
     }
@@ -466,22 +490,34 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         mHeaderQsPanel.setQSPanelAndHeader(mQsPanel, this);
         mHeaderQsPanel.setHost(host, null /* No customization in header */);
 
-        mEdit.setOnClickListener(view ->
-        mActivityStarter.postQSRunnableDismissingKeyguard(() ->
-                mQsPanel.showEdit(view)));
-
-        mSettingsButton.setOnClickListener(view -> {
-            if (!mDeviceProvisionedController.isCurrentUserSetup()) {
-                // If user isn't setup just unlock the device and dump them back at SUW.
-                mActivityStarter.postQSRunnableDismissingKeyguard(() -> {
-                });
-                return;
+        mEditClickListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mActivityStarter.postQSRunnableDismissingKeyguard(() ->
+                        mQsPanel.showEdit(view));
             }
-            MetricsLogger.action(mContext,
-                    mExpanded ? MetricsProto.MetricsEvent.ACTION_QS_EXPANDED_SETTINGS_LAUNCH
-                            : MetricsProto.MetricsEvent.ACTION_QS_COLLAPSED_SETTINGS_LAUNCH);
-            startSettingsActivity();
-        });
+        };
+
+        mSettingsClickListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (!mDeviceProvisionedController.isCurrentUserSetup()) {
+                    // If user isn't setup just unlock the device and dump them back at SUW.
+                    mActivityStarter.postQSRunnableDismissingKeyguard(() -> {
+                    });
+                    return;
+                }
+                MetricsLogger.action(mContext,
+                        mExpanded ? MetricsProto.MetricsEvent.ACTION_QS_EXPANDED_SETTINGS_LAUNCH
+                                : MetricsProto.MetricsEvent.ACTION_QS_COLLAPSED_SETTINGS_LAUNCH);
+                startSettingsActivity();
+            }
+        };
+
+        mEdit.setOnClickListener(mEditClickListener);
+        mSettingsButton.setOnClickListener(mSettingsClickListener);
+        mEditLand.setOnClickListener(mEditClickListener);
+        mSettingsButtonLand.setOnClickListener(mSettingsClickListener);
     }
 
     public void setCallback(Callback qsPanelCallback) {
@@ -539,17 +575,20 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         }
     }
 
-    private void updateClickabilities() {
+    private void updateHeaderTextContainer() {
+        mMultiUserSwitch.setVisibility(showUserSwitcher() ? View.VISIBLE : View.INVISIBLE);
         mMultiUserSwitch.setClickable(mMultiUserSwitch.getVisibility() == View.VISIBLE);
-        mEdit.setClickable(mEdit.getVisibility() == View.VISIBLE);
-        mSettingsButton.setClickable(mSettingsButton.getVisibility() == View.VISIBLE);
+        mMultiUserSwitchLand.setVisibility(showUserSwitcher() ? View.VISIBLE : View.GONE);
     }
 
-    private void updateVisibilities() {
-        final boolean isDemo = UserManager.isDeviceInDemoMode(mContext);
-        mEdit.setVisibility(isDemo || !mExpanded ? View.INVISIBLE : View.VISIBLE);
-        mSettingsButton.setVisibility(isDemo || !mExpanded ? View.INVISIBLE : View.VISIBLE);
-        mMultiUserSwitch.setVisibility(showUserSwitcher() ? View.VISIBLE : View.INVISIBLE);
+    private void updateActionButtonsDisable() {
+        post(() -> {
+            final boolean isDemo = UserManager.isDeviceInDemoMode(mContext);
+            mEdit.setVisibility(isDemo ? View.GONE : View.VISIBLE);
+            mSettingsButton.setVisibility(isDemo ? View.GONE : View.VISIBLE);
+            mEditLand.setVisibility(isDemo ? View.GONE : View.VISIBLE);
+            mSettingsButtonLand.setVisibility(isDemo ? View.GONE : View.VISIBLE);
+        });
     }
 
     private void startSettingsActivity() {
@@ -572,5 +611,6 @@ public class QuickStatusBarHeader extends RelativeLayout implements
                     Mode.SRC_IN);
         }
         mMultiUserAvatar.setImageDrawable(picture);
+        mMultiUserAvatarLand.setImageDrawable(picture);
     }
 }

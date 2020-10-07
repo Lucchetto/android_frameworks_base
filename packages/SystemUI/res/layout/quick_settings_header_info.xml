@@ -19,6 +19,7 @@
     android:layout_width="match_parent"
     android:layout_height="@dimen/qs_header_tooltip_height"
     android:layout_below="@id/quick_status_bar_system_icons"
+    android:gravity="bottom"
     android:visibility="invisible">
 
     <Space
@@ -26,38 +27,6 @@
         android:layout_height="0dp"
         android:layout_weight="1"/>
 
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom">
-
-        <com.android.systemui.statusbar.phone.MultiUserSwitch
-            android:id="@+id/multi_user_switch"
-            android:layout_width="@dimen/qs_header_action_button_size"
-            android:layout_height="@dimen/qs_header_action_button_size"
-            android:layout_alignParentEnd="true"
-            android:background="@drawable/ripple_drawable"
-            android:focusable="true">
-
-            <ImageView
-                android:id="@+id/multi_user_avatar"
-                android:layout_width="@dimen/multi_user_avatar_expanded_size"
-                android:layout_height="@dimen/multi_user_avatar_expanded_size"
-                android:layout_gravity="center"
-                android:scaleType="centerInside"/>
-        </com.android.systemui.statusbar.phone.MultiUserSwitch>
-
-            <com.android.systemui.statusbar.AlphaOptimizedImageView
-                android:id="@android:id/edit"
-                style="@style/QSActionButtons"
-                android:contentDescription="@string/accessibility_quick_settings_edit"
-                android:src="@*android:drawable/ic_mode_edit"/>
-
-            <com.android.systemui.statusbar.phone.SettingsButton
-                android:id="@+id/settings_button"
-                style="@style/QSActionButtons"
-                android:layout_marginEnd="@dimen/qs_header_icon_padding_negative"
-                android:contentDescription="@string/accessibility_quick_settings_settings"
-                android:src="@drawable/ic_settings"/>
-    </LinearLayout>
+    <include android:id="@+id/qs_header_action_buttons"
+        layout="@layout/quick_settings_header_action_buttons" />
 </LinearLayout>
