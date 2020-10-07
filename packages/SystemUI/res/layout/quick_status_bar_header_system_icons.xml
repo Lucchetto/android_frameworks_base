@@ -32,19 +32,38 @@
             style="@style/TextAppearance.QS.ClockBig"
             systemui:showDark="false" />
 
-        <LinearLayout
+        <FrameLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/qs_clock_date_margin">
+            android:layout_marginTop="@dimen/qs_clock_date_margin"
+            android:gravity="start">
 
-            <com.android.systemui.statusbar.policy.DateView
-                android:id="@+id/date"
+            <LinearLayout
+                android:id="@+id/collapsed_date_container"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                style="@style/TextAppearance.QS.Clock"
-                systemui:datePattern="@string/abbrev_wday_month_day_no_year_alarm" />
+                android:layout_height="wrap_content">
 
-        </LinearLayout>
+                <com.android.systemui.statusbar.policy.DateView
+                    android:id="@+id/collapsed_date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    style="@style/TextAppearance.QS.Clock"
+                    systemui:datePattern="@string/wday_month_day_no_year_alarm" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/expanded_date_container"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <com.android.systemui.statusbar.policy.DateView
+                    android:id="@+id/expanded_date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    style="@style/TextAppearance.QS.Clock"
+                    systemui:datePattern="@string/abbrev_wday_month_day_no_year_alarm" />
+            </LinearLayout>
+        </FrameLayout>
     </LinearLayout>
 
     <android.widget.Space

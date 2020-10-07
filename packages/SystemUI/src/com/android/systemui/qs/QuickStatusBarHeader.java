@@ -119,6 +119,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
     private boolean mExpanded;
     private boolean mListening;
     private boolean mQsDisabled;
+    private boolean mIsLandscape;
 
     private QSCarrierGroup mCarrierGroup;
     protected QuickQSPanel mHeaderQsPanel;
@@ -142,7 +143,10 @@ public class QuickStatusBarHeader extends RelativeLayout implements
 
     private ViewGroup mSystemIconsView;
     private Clock mClockView;
-    private DateView mDateView;
+    private ViewGroup mCollapsedDateViewContainer;
+    private DateView mCollapsedDateView;
+    private ViewGroup mExpandedDateViewContainer;
+    private DateView mExpandedDateView;
     private BatteryMeterView mBatteryRemainingIcon;
 
     private ViewGroup mQuickActionButtonsLand;
@@ -225,12 +229,16 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         // settings), so disable it for this view
         ((RippleDrawable) mSettingsButtonLand.getBackground()).setForceSoftware(true);
 
-        updateResources();
-
         mClockView = findViewById(R.id.clock);
         mClockView.setOnClickListener(this);
-        mDateView = findViewById(R.id.date);
-        mDateView.setOnClickListener(this);
+
+        mCollapsedDateViewContainer = findViewById(R.id.expanded_date_container);
+        mCollapsedDateView = findViewById(R.id.collapsed_date);
+        mCollapsedDateView.setOnClickListener(this);
+
+        mExpandedDateViewContainer = findViewById(R.id.collapsed_date_container);
+        mExpandedDateView = findViewById(R.id.expanded_date);
+        mExpandedDateView.setOnClickListener(this);
 
         mBatteryRemainingIcon = findViewById(R.id.batteryRemainingIcon);
         // Don't need to worry about tuner settings for this icon
@@ -239,6 +247,8 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         // it's unavailable or charging
         mBatteryRemainingIcon.setPercentShowMode(BatteryMeterView.MODE_ESTIMATE);
         mBatteryRemainingIcon.setOnClickListener(this);
+
+        updateResources();
 
         updateExtendedStatusBarTint(getContext().getColor(R.color.qs_translucent_text_primary));
     }
@@ -266,7 +276,8 @@ public class QuickStatusBarHeader extends RelativeLayout implements
 
         // mCarrierGroup.setTint(tintColor);
         mClockView.setTextColor(tintColor);
-        mDateView.setTextColor(tintColor);
+        mCollapsedDateView.setTextColor(tintColor);
+        mExpandedDateView.setTextColor(tintColor);
         mBatteryRemainingIcon.updateColors(tintColor, tintColor, tintColor);
         mCarrierGroup.setTint(tintColor);
     }
@@ -274,10 +285,10 @@ public class QuickStatusBarHeader extends RelativeLayout implements
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
+        mIsLandscape = newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE;
+        mQuickActionButtonsLand.setVisibility(mIsLandscape ? View.VISIBLE : View.GONE);
+        mQuickActionButtons.setVisibility(mIsLandscape ? View.GONE : View.VISIBLE);
         updateResources();
-        boolean isLandscape = newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE;
-        mQuickActionButtonsLand.setVisibility(isLandscape ? View.VISIBLE : View.GONE);
-        mQuickActionButtons.setVisibility(isLandscape ? View.GONE : View.VISIBLE);
     }
 
     @Override
@@ -328,9 +339,22 @@ public class QuickStatusBarHeader extends RelativeLayout implements
     }
 
     private void updateHeaderTextContainerAlphaAnimator() {
-        mHeaderTextContainerAlphaAnimator = new TouchAnimator.Builder()
+        if (mIsLandscape) {
+            mHeaderTextContainerAlphaAnimator = null;
+            mCollapsedDateViewContainer.setVisibility(View.GONE);
+            mCollapsedDateViewContainer.setAlpha(mExpandedHeaderAlpha);
+            mExpandedDateViewContainer.setVisibility(View.VISIBLE);
+            mExpandedDateViewContainer.setAlpha(mExpandedHeaderAlpha);
+        } else {
+            mHeaderTextContainerAlphaAnimator = new TouchAnimator.Builder()
                 .addFloat(mHeaderTextContainerView, "alpha", 0, 0, mExpandedHeaderAlpha)
+                .addFloat(mExpandedDateViewContainer, "alpha", 0, 0, mExpandedHeaderAlpha)
+                .addFloat(mCollapsedDateViewContainer, "alpha", mExpandedHeaderAlpha, 0, 0)
                 .build();
+            mCollapsedDateViewContainer.setVisibility(View.VISIBLE);
+            mExpandedDateViewContainer.setVisibility(mExpanded ? View.VISIBLE : View.GONE);
+
+        }
     }
 
     public void setExpanded(boolean expanded) {
@@ -338,6 +362,9 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         mExpanded = expanded;
         mHeaderQsPanel.setExpanded(expanded);
         updateEverything();
+        if (!mIsLandscape) {
+            mExpandedDateViewContainer.setVisibility(mExpanded ? View.VISIBLE : View.GONE);
+        }
     }
 
     /**
@@ -472,7 +499,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         if (v == mClockView) {
             mActivityStarter.postStartActivityDismissingKeyguard(new Intent(
                     AlarmClock.ACTION_SHOW_ALARMS), 0);
-        } else if (v == mDateView) {
+        } else if (v == mCollapsedDateView || v == mExpandedDateView) {
             mActivityStarter.postStartActivityDismissingKeyguard(new Intent(
                     Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_APP_CALENDAR),0);
         } else if (v == mBatteryRemainingIcon) {

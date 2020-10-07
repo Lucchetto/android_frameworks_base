@@ -23,4 +23,6 @@
 
     <!-- Title for media output settings -->
     <string name="media_output_title">Play media to</string>
+
+    <string name="wday_month_day_no_year_alarm" translatable="false">EEEEMMMMd</string>
 </resources>
