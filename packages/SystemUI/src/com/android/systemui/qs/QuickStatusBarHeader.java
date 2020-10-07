@@ -253,6 +253,8 @@ public class QuickStatusBarHeader extends RelativeLayout implements
                 com.android.internal.R.string.status_bar_camera));
         ignored.add(mContext.getResources().getString(
                 com.android.internal.R.string.status_bar_microphone));
+        ignored.add(mContext.getResources().getString(
+                com.android.internal.R.string.status_bar_mobile));
 
         return ignored;
     }
