@@ -21,6 +21,10 @@
         <item name="android:minHeight">@dimen/min_qs_big_clock_container_size</item>
     </style>
 
+    <style name="TextAppearance.QS.Highlights" parent="TextAppearance.QS.Clock">
+        <item name="android:textColor">@color/qs_translucent_text_secondary</item>
+    </style>
+
     <style name="TextAppearance.MediaPlayer">
         <item name="android:textSize">15sp</item>
         <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>

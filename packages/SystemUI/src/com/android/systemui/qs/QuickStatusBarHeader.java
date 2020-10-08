@@ -81,6 +81,7 @@ import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 import com.android.systemui.statusbar.policy.DateView;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
+import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.UserInfoController.OnUserInfoChangedListener;
 
@@ -98,7 +99,8 @@ import javax.inject.Named;
  * contents.
  */
 public class QuickStatusBarHeader extends RelativeLayout implements
-        View.OnClickListener,ConfigurationListener, OnUserInfoChangedListener {
+        View.OnClickListener,ConfigurationListener, OnUserInfoChangedListener,
+        NextAlarmController.NextAlarmChangeCallback {
     private static final String TAG = "QuickStatusBarHeader";
     private static final boolean DEBUG = false;
 
@@ -109,6 +111,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
     public static final int MAX_TOOLTIP_SHOWN_COUNT = 2;
 
     private final Handler mHandler = new Handler();
+    private final NextAlarmController mAlarmController;
     private final StatusBarIconController mStatusBarIconController;
     private final ActivityStarter mActivityStarter;
     private final DeviceProvisionedController mDeviceProvisionedController;
@@ -129,12 +132,15 @@ public class QuickStatusBarHeader extends RelativeLayout implements
     private TouchAnimator mPrivacyChipAlphaAnimator;
     private final CommandQueue mCommandQueue;
 
+    private AlarmManager.AlarmClockInfo mNextAlarm;
+
     private LinearLayout mClockDateContainer, mStatusIconsContainer;
 
     View.OnClickListener mEditClickListener;
     View.OnClickListener mSettingsClickListener;
 
     private ViewGroup mHeaderTextContainerView;
+    private View mAlarmContainer;
     private ViewGroup mQuickActionButtons;
     protected MultiUserSwitch mMultiUserSwitch;
     private ImageView mMultiUserAvatar;
@@ -172,13 +178,15 @@ public class QuickStatusBarHeader extends RelativeLayout implements
             ActivityStarter activityStarter,
             CommandQueue commandQueue,
             DeviceProvisionedController deviceProvisionedController,
-            UserInfoController userInfoController) {
+            UserInfoController userInfoController,
+            NextAlarmController nextAlarmController) {
         super(context, attrs);
         mStatusBarIconController = statusBarIconController;
         mActivityStarter = activityStarter;
         mCommandQueue = commandQueue;
         mDeviceProvisionedController = deviceProvisionedController;
         mUserInfoController = userInfoController;
+        mAlarmController = nextAlarmController;
     }
 
     @Override
@@ -211,6 +219,8 @@ public class QuickStatusBarHeader extends RelativeLayout implements
 
         // Views corresponding to the header info section (e.g. ringer and next alarm).
         mHeaderTextContainerView = findViewById(R.id.header_text_container);
+        mAlarmContainer = findViewById(R.id.alarm_container);
+        mAlarmContainer.setOnClickListener(this);
         mQuickActionButtons = mHeaderTextContainerView.findViewById(R.id.qs_header_action_buttons);
         mMultiUserSwitch = mQuickActionButtons.findViewById(R.id.multi_user_switch);
         mMultiUserAvatar = mMultiUserSwitch.findViewById(R.id.multi_user_avatar);
@@ -250,7 +260,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
 
         updateResources();
 
-        updateExtendedStatusBarTint(getContext().getColor(R.color.qs_translucent_text_primary));
+        updateExtendedStatusBarTint();
     }
 
     public QuickQSPanel getHeaderQsPanel() {
@@ -269,12 +279,18 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         return ignored;
     }
 
-    private void updateExtendedStatusBarTint(int tintColor) {
+    private void updateExtendedStatusBarTint() {
+        int tintColor = getContext().getColor(R.color.qs_translucent_text_primary);
         if (mIconManager != null) {
             mIconManager.setTint(tintColor);
         }
         mBatteryRemainingIcon.updateColors(tintColor, tintColor, tintColor);
         mCarrierGroup.setTint(tintColor);
+        
+        ColorStateList tintSecondaryStateList = ColorStateList.valueOf(
+                getContext().getColor(R.color.qs_translucent_text_secondary));
+        ImageView alarmIcon = mAlarmContainer.findViewById(R.id.alarm_icon);
+        alarmIcon.setImageTintList(tintSecondaryStateList);
     }
 
     @Override
@@ -484,8 +500,10 @@ public class QuickStatusBarHeader extends RelativeLayout implements
 
         if (mListening) {
             mUserInfoController.addCallback(this);
+            mAlarmController.addCallback(this);
         } else {
             mUserInfoController.removeCallback(this);
+            mAlarmController.removeCallback(this);
         }
     }
 
@@ -500,7 +518,35 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         } else if (v == mBatteryRemainingIcon) {
             mActivityStarter.postStartActivityDismissingKeyguard(new Intent(
                     Intent.ACTION_POWER_USAGE_SUMMARY),0);
+        } else if (v == mAlarmContainer && mAlarmContainer.isVisibleToUser()) {
+            if (mNextAlarm.getShowIntent() != null) {
+                mActivityStarter.postStartActivityDismissingKeyguard(
+                        mNextAlarm.getShowIntent());
+            } else {
+                Log.d(TAG, "No PendingIntent for next alarm. Using default intent");
+                mActivityStarter.postStartActivityDismissingKeyguard(new Intent(
+                        AlarmClock.ACTION_SHOW_ALARMS), 0);
+            }
         }
+    }
+
+    @Override
+    public void onNextAlarmChanged(AlarmManager.AlarmClockInfo nextAlarm) {
+        mNextAlarm = nextAlarm;
+        updateAlarmView();
+    }
+
+    private void updateAlarmView() {
+        boolean isOriginalVisible = mAlarmContainer.getVisibility() == View.VISIBLE;
+        TextView alarmTextView = mAlarmContainer.findViewById(R.id.alarm_text);
+        CharSequence originalAlarmText = alarmTextView.getText();
+
+        boolean alarmVisible = false;
+        if (mNextAlarm != null) {
+            alarmVisible = true;
+            alarmTextView.setText(formatNextAlarm(mNextAlarm));
+        }
+        mAlarmContainer.setVisibility(alarmVisible ? View.VISIBLE : View.GONE);
     }
 
     public void updateEverything() {
