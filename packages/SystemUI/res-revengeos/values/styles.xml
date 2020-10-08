@@ -9,13 +9,13 @@
     <style name="TextAppearance.QS.Clock" parent="@*android:style/TextAppearance.StatusBar.Icon">
         <item name="android:textSize">@dimen/qs_clock_size</item>
         <item name="android:fontFamily">@*android:string/config_headlineFontFamilyMedium</item>
-        <item name="android:textColor">@color/status_bar_clock_color</item>
+        <item name="android:textColor">@color/qs_translucent_text_primary</item>
         <item name="android:minHeight">@dimen/min_qs_clock_container_size</item>
         <item name="android:includeFontPadding">false</item>
         <item name="android:singleLine">true</item>
     </style>
 
-    <style name="TextAppearance.QS.ClockBig" parent="TextAppearance.StatusBar.Clock">
+    <style name="TextAppearance.QS.ClockBig" parent="TextAppearance.QS.Clock">
         <item name="android:textSize">@dimen/qs_big_clock_size</item>
         <item name="android:fontFamily">@*android:string/config_headlineFontFamilyMedium</item>
         <item name="android:minHeight">@dimen/min_qs_big_clock_container_size</item>
@@ -39,7 +39,7 @@
         <item name="android:layout_height">@dimen/qs_header_action_button_size</item>
         <item name="android:padding">@dimen/qs_header_icon_padding</item>
         <item name="android:background">?android:attr/selectableItemBackgroundBorderless</item>
-        <item name="android:tint">@color/qs_translucent_primary</item>
+        <item name="android:tint">@color/qs_translucent_text_primary</item>
         <item name="android:scaleType">centerInside</item>
     </style>
 </resources>

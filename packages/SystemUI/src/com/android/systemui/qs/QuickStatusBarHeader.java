@@ -273,11 +273,6 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         if (mIconManager != null) {
             mIconManager.setTint(tintColor);
         }
-
-        // mCarrierGroup.setTint(tintColor);
-        mClockView.setTextColor(tintColor);
-        mCollapsedDateView.setTextColor(tintColor);
-        mExpandedDateView.setTextColor(tintColor);
         mBatteryRemainingIcon.updateColors(tintColor, tintColor, tintColor);
         mCarrierGroup.setTint(tintColor);
     }
