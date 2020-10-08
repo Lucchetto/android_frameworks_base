@@ -31,6 +31,8 @@ import com.android.systemui.qs.QSPanel.TileRecord;
 import java.util.ArrayList;
 import java.util.Set;
 
+import me.everything.android.ui.overscroll.OverScrollDecoratorHelper;
+
 public class PagedTileLayout extends ViewPager implements QSTileLayout {
 
     private static final boolean DEBUG = false;
@@ -201,6 +203,8 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         super.onFinishInflate();
         mPages.add(createTilePage());
         mAdapter.notifyDataSetChanged();
+
+        OverScrollDecoratorHelper.setUpOverScroll(this);
     }
 
     private TilePage createTilePage() {

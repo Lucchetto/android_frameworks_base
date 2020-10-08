@@ -73,6 +73,7 @@ android_library {
         "jsr330",
         "vendor.lineage.biometrics.fingerprint.inscreen-V1.0-java",
         "RevengeUI-lib",
+        "overscroll-decor",
     ],
     manifest: "AndroidManifest.xml",
 
