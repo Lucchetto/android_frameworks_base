@@ -21,7 +21,10 @@ import android.annotation.StringRes;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.util.AttributeSet;
+import android.util.TypedValue;
+import android.view.ContextThemeWrapper;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.android.systemui.R;
@@ -30,7 +33,9 @@ import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 
 public class EmptyShadeView extends StackScrollerDecorView {
 
+    private View mEmptyContainer;
     private TextView mEmptyText;
+    private Button mHistoryButton;
     private @StringRes int mText = R.string.empty_shade_text;
 
     public EmptyShadeView(Context context, AttributeSet attrs) {
@@ -41,11 +46,15 @@ public class EmptyShadeView extends StackScrollerDecorView {
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         mEmptyText.setText(mText);
+        mEmptyText.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(
+                R.dimen.no_notifications_container_text_size));
+        mEmptyContainer.setPadding(0, getResources().getDimensionPixelSize(
+                R.dimen.no_notifications_container_top_padding), 0, 0);
     }
 
     @Override
     protected View findContentView() {
-        return findViewById(R.id.no_notifications);
+        return findViewById(R.id.no_notifications_container);
     }
 
     @Override
@@ -53,8 +62,11 @@ public class EmptyShadeView extends StackScrollerDecorView {
         return null;
     }
 
-    public void setTextColor(@ColorInt int color) {
+    public void setTint(@ColorInt int color) {
         mEmptyText.setTextColor(color);
+        mHistoryButton.setTextColor(color);
+        mHistoryButton.setBackground(getResources().getDrawable(
+                R.drawable.btn_translucent_borderless, getContext().getTheme()));
     }
 
     public void setText(@StringRes int text) {
@@ -66,10 +78,20 @@ public class EmptyShadeView extends StackScrollerDecorView {
         return mText;
     }
 
+    public void setShowHistory(boolean show) {
+        mHistoryButton.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
+    public View getHistoryButton() {
+        return mHistoryButton;
+    }
+
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mEmptyText = (TextView) findContentView();
+        mEmptyContainer = (View) findContentView();
+        mEmptyText = findViewById(R.id.no_notifications);
+        mHistoryButton = findViewById(R.id.notifications_history_btn);
     }
 
     @Override
@@ -83,7 +105,7 @@ public class EmptyShadeView extends StackScrollerDecorView {
             super.applyToView(view);
             if (view instanceof EmptyShadeView) {
                 EmptyShadeView emptyShadeView = (EmptyShadeView) view;
-                boolean visible = this.clipTopAmount <= mEmptyText.getPaddingTop() * 0.6f;
+                boolean visible = this.clipTopAmount <= mEmptyContainer.getPaddingTop() * 0.6f;
                 emptyShadeView.setContentVisible(visible && emptyShadeView.isVisible());
             }
         }

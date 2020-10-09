@@ -46,4 +46,13 @@
         <item name="android:tint">@color/qs_translucent_text_primary</item>
         <item name="android:scaleType">centerInside</item>
     </style>
+
+    <style name="TraslucentButton" parent="@*android:style/Widget.DeviceDefault.Button">
+        <item name="android:textColor">@color/qs_translucent_text_primary</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:minHeight">0dp</item>
+        <item name="android:minWidth">0dp</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:background">@drawable/btn_translucent_borderless</item>
+    </style>
 </resources>
