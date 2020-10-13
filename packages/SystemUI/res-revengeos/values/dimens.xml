@@ -43,7 +43,7 @@
     <dimen name="qs_brightness_thiccbar_height">22dp</dimen>
 
     <dimen name="no_notifications_container_top_padding">32dp</dimen>
-    <dimen name="no_notifications_container_text_size">24sp</dimen>
+    <dimen name="no_notifications_text_size">24sp</dimen>
 
     <!-- Volume dialog -->
     <dimen name="volume_dialog_panel_transparent_padding_left_right">8dp</dimen>

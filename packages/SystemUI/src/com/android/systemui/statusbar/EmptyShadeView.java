@@ -22,7 +22,6 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.util.AttributeSet;
 import android.util.TypedValue;
-import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -47,9 +46,11 @@ public class EmptyShadeView extends StackScrollerDecorView {
         super.onConfigurationChanged(newConfig);
         mEmptyText.setText(mText);
         mEmptyText.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(
-                R.dimen.no_notifications_container_text_size));
+                R.dimen.no_notifications_text_size));
         mEmptyContainer.setPadding(0, getResources().getDimensionPixelSize(
                 R.dimen.no_notifications_container_top_padding), 0, 0);
+        boolean isLandscape = newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE;
+        mHistoryButton.setVisibility(isLandscape ? View.GONE : View.VISIBLE);
     }
 
     @Override
@@ -66,7 +67,7 @@ public class EmptyShadeView extends StackScrollerDecorView {
         mEmptyText.setTextColor(color);
         mHistoryButton.setTextColor(color);
         mHistoryButton.setBackground(getResources().getDrawable(
-                R.drawable.btn_translucent_borderless, getContext().getTheme()));
+                R.drawable.btn_translucent_borderless));
     }
 
     public void setText(@StringRes int text) {
@@ -80,6 +81,10 @@ public class EmptyShadeView extends StackScrollerDecorView {
 
     public void setShowHistory(boolean show) {
         mHistoryButton.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
+    public View getEmptyTextView() {
+        return mEmptyText;
     }
 
     public View getHistoryButton() {

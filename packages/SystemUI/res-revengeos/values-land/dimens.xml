@@ -16,7 +16,7 @@
 <resources>
 
     <dimen name="no_notifications_container_top_padding">10dp</dimen>
-    <dimen name="no_notifications_container_text_size">16sp</dimen>
+    <dimen name="no_notifications_text_size">20sp</dimen>
 
     <dimen name="volume_dialog_slider_height">180dp</dimen>
     <dimen name="volume_dialog_panel_transparent_padding">0dp</dimen>

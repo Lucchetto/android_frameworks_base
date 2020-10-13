@@ -41,6 +41,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.database.ContentObserver;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Outline;
@@ -52,6 +53,7 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.ServiceManager;
+import android.os.Handler;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.notification.NotificationListenerService;
@@ -679,6 +681,30 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         });
     }
 
+    private Handler mHandler = new Handler();
+
+    private NotificationsSettingsObserver mNotificationsSettingsObserver = new NotificationsSettingsObserver(mHandler);
+    private class NotificationsSettingsObserver extends ContentObserver {
+        NotificationsSettingsObserver(Handler handler) {
+            super(handler);
+        }
+
+        void observe() {
+            mContext.getContentResolver().registerContentObserver(Settings.Secure.getUriFor(
+                    Settings.Secure.NOTIFICATION_HISTORY_ENABLED),
+                    false, this, UserHandle.USER_ALL);
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            update();
+        }
+
+        public void update() {
+            updateEmptyShadeView();
+        }
+    }
+
     private void initializeForegroundServiceSection(
             ForegroundServiceDismissalFeatureController featureController) {
         if (featureController.isForegroundServiceDismissalEnabled()) {
@@ -705,6 +731,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         super.onFinishInflate();
 
         inflateEmptyShadeView();
+        mNotificationsSettingsObserver.observe();
         inflateFooterView();
         mVisualStabilityManager.setVisibilityLocationProvider(this::isInVisibleLocation);
         if (mAllowLongPress) {
@@ -5787,10 +5814,22 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             Intent intent = new Intent(Settings.ACTION_NOTIFICATION_HISTORY);
             mStatusBar.startActivity(intent, true, true, Intent.FLAG_ACTIVITY_SINGLE_TOP);
         });
+        view.getEmptyTextView().setOnClickListener(v -> {
+            Intent intent = new Intent(Settings.ACTION_NOTIFICATION_SETTINGS);
+            mStatusBar.startActivity(intent, true, true, Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        });
         setEmptyShadeView(view);
-        final boolean showHistory = Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                Settings.Secure.NOTIFICATION_HISTORY_ENABLED, 0, UserHandle.USER_CURRENT) == 1;
-        mEmptyShadeView.setShowHistory(showHistory);
+        updateEmptyShadeView();
+
+    }
+
+    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
+    private void updateEmptyShadeView() {
+        if (mEmptyShadeView != null) {
+            final boolean showHistory = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                    Settings.Secure.NOTIFICATION_HISTORY_ENABLED, 0, UserHandle.USER_CURRENT) == 1;
+            mEmptyShadeView.setShowHistory(showHistory);
+        }
 
     }
 

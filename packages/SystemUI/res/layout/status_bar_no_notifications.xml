@@ -29,16 +29,17 @@
         android:minHeight="64dp"
         android:paddingTop="@dimen/no_notifications_container_top_padding"
         android:orientation="vertical">
+
         <TextView
             android:id="@+id/no_notifications"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceButton"
-            android:textSize="@dimen/no_notifications_container_text_size"
+            android:textSize="@dimen/no_notifications_text_size"
             android:gravity="top|center_horizontal"
             android:textColor="@color/qs_translucent_text_primary"
             android:text="@string/empty_shade_text"/>
-    
+
         <Button
             android:id="@+id/notifications_history_btn"
             android:layout_width="wrap_content"
@@ -46,6 +47,7 @@
             android:layout_marginTop="11dp"
             android:text="@string/manage_notifications_history_text"
             android:contentDescription="@string/manage_notifications_history_text"
+            android:visibility="gone"
             style="@style/TraslucentButton" />
     </LinearLayout>
 </com.android.systemui.statusbar.EmptyShadeView>
