@@ -85,6 +85,8 @@ public class MediaControlPanel {
     // This will provide the corners for the album art.
     private final ViewOutlineProvider mViewOutlineProvider;
 
+    private boolean mTranslucentBg;
+
     /**
      * Initialize a new control panel
      * @param context
@@ -414,5 +416,17 @@ public class MediaControlPanel {
     private void setVisibleAndAlpha(ConstraintSet set, int actionId, boolean visible) {
         set.setVisibility(actionId, visible? ConstraintSet.VISIBLE : ConstraintSet.GONE);
         set.setAlpha(actionId, visible ? 1.0f : 0.0f);
+    }
+
+    void setTranslucentBackground(boolean translucentBg) {
+        View playerView = mViewHolder.getPlayer();
+        ColorStateList tint = mViewHolder.getPlayer().getBackgroundTintList();
+        if (translucentBg != mTranslucentBg) {
+            mTranslucentBg = translucentBg;
+            playerView.setBackgroundResource(translucentBg ?
+                    R.drawable.qs_translucent_media_background
+                    : R.drawable.qs_media_background);
+            playerView.setBackgroundTintList(tint);
+        }
     }
 }

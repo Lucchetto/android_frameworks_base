@@ -466,6 +466,7 @@ class MediaCarouselController @Inject constructor(
                 }
             }
             updateCarouselSize()
+            setCarouselTranslucent(desiredLocation != MediaHierarchyManager.LOCATION_LOCKSCREEN)
         }
     }
 
@@ -488,6 +489,12 @@ class MediaCarouselController @Inject constructor(
             mediaCarousel.layout(0, 0, width, mediaCarousel.measuredHeight)
             // Update the padding after layout; view widths are used in RTL to calculate scrollX
             mediaCarouselScrollHandler.playerWidthPlusPadding = playerWidthPlusPadding
+        }
+    }
+
+    private fun setCarouselTranslucent(value : Boolean) {
+        for (mediaPlayer in mediaPlayers.values) {
+            mediaPlayer.setTranslucentBackground(value)
         }
     }
 }
