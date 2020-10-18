@@ -68,6 +68,7 @@ import com.android.keyguard.KeyguardClockSwitch;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
+import com.android.settingslib.animation.AppearAnimationUtils;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
@@ -81,6 +82,7 @@ import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.qs.QSFragment;
+import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.statusbar.GestureRecorder;
@@ -480,6 +482,8 @@ public class NotificationPanelViewController extends PanelViewController {
             return super.performAccessibilityAction(host, action, args);
         }
     };
+
+    private boolean mKeyguardStatusViewFaded;
 
     @Inject
     public NotificationPanelViewController(NotificationPanelView view,
@@ -1700,9 +1704,11 @@ public class NotificationPanelViewController extends PanelViewController {
         updateQsExpansion();
         requestScrollerTopPaddingUpdate(false /* animate */);
         updateHeaderKeyguardAlpha();
+        float expansion = mQsMaxExpansionHeight != 0 ? mQsExpansionHeight / mQsMaxExpansionHeight : 0;
         if (mBarState == StatusBarState.SHADE_LOCKED || mBarState == StatusBarState.KEYGUARD) {
             updateKeyguardBottomAreaAlpha();
             updateBigClockAlpha();
+            setKeyguardStatusViewFaded(expansion > 0);
         }
         if (mBarState == StatusBarState.SHADE && mQsExpanded && !mStackScrollerOverscrolling
                 && mQsScrimEnabled) {
@@ -1718,8 +1724,7 @@ public class NotificationPanelViewController extends PanelViewController {
                     false /* dismissShade */, true /* afterKeyguardGone */, false /* deferred */);
         }
         for (int i = 0; i < mExpansionListeners.size(); i++) {
-            mExpansionListeners.get(i).onQsExpansionChanged(
-                    mQsMaxExpansionHeight != 0 ? mQsExpansionHeight / mQsMaxExpansionHeight : 0);
+            mExpansionListeners.get(i).onQsExpansionChanged(expansion);
         }
         if (DEBUG) {
             mView.invalidate();
@@ -1731,6 +1736,13 @@ public class NotificationPanelViewController extends PanelViewController {
         float qsExpansionFraction = getQsExpansionFraction();
         mQs.setQsExpansion(qsExpansionFraction, getHeaderTranslation());
         mMediaHierarchyManager.setQsExpansion(qsExpansionFraction);
+    }
+
+    private void setKeyguardStatusViewFaded(boolean fade) {
+        if (mKeyguardStatusViewFaded != fade) {
+            setKeyguardStatusViewVisibility(mBarState, false, fade);
+            mKeyguardStatusViewFaded = fade;
+        }
     }
 
     private String determineAccessibilityPaneTitle() {
