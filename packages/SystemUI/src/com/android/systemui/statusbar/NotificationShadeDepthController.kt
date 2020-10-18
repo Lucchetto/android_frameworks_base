@@ -287,6 +287,18 @@ class NotificationShadeDepthController @Inject constructor(
      * Update blurs when pulling down the shade
      */
     override fun onPanelExpansionChanged(expansion: Float, tracking: Boolean) {
+        if (isOnUnlockedShade()) {
+            updateBlur(expansion, tracking)
+        }
+    }
+
+    override fun onQsExpansionChanged(expansion: Float) {
+        if (!isOnUnlockedShade()) {
+            updateBlur(expansion, true)
+        }
+    }
+
+    private fun updateBlur(expansion: Float, tracking: Boolean) {
         val timestamp = SystemClock.elapsedRealtimeNanos()
 
         if (shadeExpansion == expansion && prevTracking == tracking) {
@@ -399,9 +411,12 @@ class NotificationShadeDepthController @Inject constructor(
     }
 
     private fun isOnKeyguardNotDismissing(): Boolean {
+        return !keyguardStateController.isKeyguardFadingAway
+    }
+
+    private fun isOnUnlockedShade(): Boolean {
         val state = statusBarStateController.state
-        return (state == StatusBarState.SHADE || state == StatusBarState.SHADE_LOCKED) &&
-                !keyguardStateController.isKeyguardFadingAway
+        return (state == StatusBarState.SHADE || state == StatusBarState.SHADE_LOCKED)
     }
 
     fun updateGlobalDialogVisibility(visibility: Float, dialogView: View?) {
