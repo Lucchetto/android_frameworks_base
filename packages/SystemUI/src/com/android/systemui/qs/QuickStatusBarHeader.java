@@ -608,7 +608,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
             return "";
         }
         String skeleton = android.text.format.DateFormat
-                .is24HourFormat(mContext, ActivityManager.getCurrentUser()) ? "EHm" : "Ehma";
+                .is24HourFormat(mContext, ActivityManager.getCurrentUser()) ? "EEEEHm" : "EEEEhma";
         String pattern = android.text.format.DateFormat
                 .getBestDateTimePattern(Locale.getDefault(), skeleton);
         return android.text.format.DateFormat.format(pattern, info.getTriggerTime()).toString();
