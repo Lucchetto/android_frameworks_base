@@ -355,7 +355,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
             mHeaderTextContainerAlphaAnimator = null;
             mCollapsedDateViewContainer.setVisibility(View.GONE);
             mCollapsedDateViewContainer.setAlpha(mExpandedHeaderAlpha);
-            mExpandedDateViewContainer.setVisibility(View.VISIBLE);
+            setExpandedDateVisibility(true);
             mExpandedDateViewContainer.setAlpha(mExpandedHeaderAlpha);
         } else {
             mHeaderTextContainerAlphaAnimator = new TouchAnimator.Builder()
@@ -364,7 +364,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
                 .addFloat(mCollapsedDateViewContainer, "alpha", mExpandedHeaderAlpha, 0, 0)
                 .build();
             mCollapsedDateViewContainer.setVisibility(View.VISIBLE);
-            mExpandedDateViewContainer.setVisibility(mExpanded ? View.VISIBLE : View.GONE);
+            setExpandedDateVisibility(mExpanded);
 
         }
     }
@@ -375,8 +375,13 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         mHeaderQsPanel.setExpanded(expanded);
         updateEverything();
         if (!mIsLandscape) {
-            mExpandedDateViewContainer.setVisibility(mExpanded ? View.VISIBLE : View.GONE);
+            setExpandedDateVisibility(mExpanded);
         }
+    }
+
+    private void setExpandedDateVisibility(boolean visible) {
+        mExpandedDateViewContainer.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
+        mExpandedDateViewContainer.setClickable(visible);
     }
 
     /**
