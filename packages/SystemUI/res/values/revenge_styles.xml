@@ -14,10 +14,15 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
+
 <resources>
 
     <!-- Pure Tuner Theme-->
     <style name="ExTunerSettings" parent="@android:style/Theme.DeviceDefault.Settings">
         <item name="preferenceTheme">@style/TunerPreferenceTheme</item>
     </style>
+    <!-- Caffeine tile -->
+    <string name="quick_settings_caffeine_label">Caffeine</string>
+    <string name="accessibility_quick_settings_caffeine_off">Caffeine off</string>
+    <string name="accessibility_quick_settings_caffeine_on">Caffeine on</string>
 </resources>
