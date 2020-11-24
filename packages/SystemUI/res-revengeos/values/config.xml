@@ -23,6 +23,9 @@
 
     <!-- Whether to use monochrome QS Tiles style -->
     <bool name="qs_tiles_monochrome_style">true</bool>
+
+    <!-- Whether to draw the Media Player with side margins -->
+    <bool name="draw_media_player_side_margins">false</bool>
     
      <!-- Max visible status icons -->
      <integer name="config_maxVisibleStatusIcons">7</integer>

@@ -129,6 +129,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     private int mContentMarginEnd;
     private int mVisualTilePadding;
     private boolean mUsingHorizontalLayout;
+    private boolean mDrawMediaPlayerSideMargins;
 
     private QSCustomizer mCustomizePanel;
     private Record mDetailRecord;
@@ -173,6 +174,9 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         mUiEventLogger = uiEventLogger;
 
         setOrientation(VERTICAL);
+
+        mDrawMediaPlayerSideMargins = getResources().getBoolean(
+                R.bool.draw_media_player_side_margins);
 
         addViewsAboveTiles();
         mMovableContentStartIndex = getChildCount();
@@ -1082,10 +1086,15 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     protected void updateMediaHostContentMargins() {
         if (mUsingMediaPlayer) {
             int marginStart = mContentMarginStart;
+            int marginEnd = mContentMarginEnd;
             if (mUsingHorizontalLayout) {
                 marginStart = 0;
             }
-            updateMargins(mMediaHost.getHostView(), marginStart, mContentMarginEnd);
+            if (!mDrawMediaPlayerSideMargins) {
+                marginStart = 0;
+                marginEnd = 0;
+            }
+            updateMargins(mMediaHost.getHostView(), marginStart, marginEnd);
         }
     }
 
