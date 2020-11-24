@@ -24,7 +24,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
-import android.widget.RelativeLayout;
+import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
@@ -33,7 +33,7 @@ import com.android.settingslib.RestrictedLockUtils;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 
-public class ToggleSliderView extends RelativeLayout implements ToggleSlider {
+public class ToggleSliderView extends LinearLayout implements ToggleSlider {
     private Listener mListener;
     private boolean mTracking;
 

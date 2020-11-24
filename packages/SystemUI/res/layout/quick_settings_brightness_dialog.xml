@@ -25,6 +25,7 @@
         android:layout_width="0dp"
         android:layout_height="48dp"
         android:layout_gravity="center_vertical"
+        android:gravity="center"
         android:layout_weight="1"
         android:contentDescription="@string/accessibility_brightness"
         android:importantForAccessibility="no"
