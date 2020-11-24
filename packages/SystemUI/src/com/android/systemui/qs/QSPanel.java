@@ -562,6 +562,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
             updateTileLayoutMargins();
             updateFooterMargin();
             updateMediaDisappearParameters();
+            updateMediaHostContentMargins();
             updateHorizontalLinearLayoutMargins();
             updatePadding();
             return true;
@@ -1032,6 +1033,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         mContentMarginEnd = endMargin;
         updateTileLayoutMargins(mContentMarginStart - mVisualTilePadding,
                 mContentMarginEnd - mVisualTilePadding);
+        updateMediaHostContentMargins();
         updateFooterMargin();
     }
 
@@ -1071,6 +1073,19 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
             mTileLayout.setSidePadding(0, 0);
         } else {
             mTileLayout.setSidePadding(mVisualMarginStart, mVisualMarginEnd);
+        }
+    }
+
+    /**
+     * Update the margins of the media hosts
+     */
+    protected void updateMediaHostContentMargins() {
+        if (mUsingMediaPlayer) {
+            int marginStart = mContentMarginStart;
+            if (mUsingHorizontalLayout) {
+                marginStart = 0;
+            }
+            updateMargins(mMediaHost.getHostView(), marginStart, mContentMarginEnd);
         }
     }
 
