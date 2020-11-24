@@ -42,6 +42,11 @@
     <item name="android:fontFamily">@*android:string/config_headlineFontFamilyMedium</item>
     </style>
 
+    <style name="QSBrightnessThiccBar" parent="@android:style/Widget.DeviceDefault.SeekBar">
+        <item name="android:thumb">@null</item>
+        <item name="android:progressDrawable">@drawable/brightness_progress_drawable</item>
+    </style>
+
     <style name="QSActionButtons">
         <item name="android:layout_width">@dimen/qs_header_action_button_size</item>
         <item name="android:layout_height">@dimen/qs_header_action_button_size</item>
