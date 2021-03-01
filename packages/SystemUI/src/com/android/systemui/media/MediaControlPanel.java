@@ -271,11 +271,6 @@ public class MediaControlPanel {
         titleText.setText(data.getSong());
         titleText.setTextColor(mForegroundColor);
 
-        // App title
-        TextView appName = mViewHolder.getAppName();
-        appName.setText(data.getApp());
-        appName.setTextColor(mForegroundColor);
-
         // Artist name
         TextView artistText = mViewHolder.getArtistText();
         artistText.setText(data.getArtist());
